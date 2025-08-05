@@ -21,7 +21,9 @@ export default function WorkflowCanvas() {
   }));
 
   useEffect(() => {
-    if (!hydrated) {
+    // The loadOrCreateWorkflow in page.tsx will handle hydration when using Firestore.
+    // This is a fallback for when not using Firestore persistence.
+    if (!hydrated && !useWorkflowStore.getState().workflow) {
       initializeDefaultWorkflow();
     }
   }, [hydrated, initializeDefaultWorkflow]);
@@ -36,7 +38,11 @@ export default function WorkflowCanvas() {
   
   function handleDragEnd(event: DragEndEvent) {
     const { active, delta } = event;
-    moveNode(active.id as string, delta);
+    const nodeId = active.id as string;
+    // Check if the dragged item is a node from the canvas
+    if (nodes.some(n => n.id === nodeId)) {
+      moveNode(nodeId, delta);
+    }
   }
 
   return (
