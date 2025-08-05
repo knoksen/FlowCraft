@@ -13,6 +13,9 @@ const initialSteps: WorkflowStep[] = [
     description: "Triggered when a new user signs up.",
     icon: UserPlus,
     iconColor: "text-green-500",
+    position: { x: 50, y: 50 },
+    type: 'placeholder',
+    config: null,
   },
   {
     id: "2",
@@ -20,6 +23,9 @@ const initialSteps: WorkflowStep[] = [
     description: "Send a personalized welcome email.",
     icon: Mail,
     iconColor: "text-blue-500",
+    position: { x: 450, y: 150 },
+    type: 'placeholder',
+    config: null,
   },
   {
     id: "3",
@@ -27,6 +33,9 @@ const initialSteps: WorkflowStep[] = [
     description: "Create a new contact in the CRM database.",
     icon: Database,
     iconColor: "text-purple-500",
+    position: { x: 50, y: 250 },
+    type: 'placeholder',
+    config: null,
   },
   {
     id: "4",
@@ -34,23 +43,37 @@ const initialSteps: WorkflowStep[] = [
     description: "Send a webhook notification to Slack.",
     icon: Webhook,
     iconColor: "text-slate-500",
+    position: { x: 450, y: 350 },
+    type: 'placeholder',
+    config: null,
   },
 ];
 
 export function WorkflowBuilder() {
   const [steps, setSteps] = useState<WorkflowStep[]>(initialSteps);
 
-  const addStep = (step: Omit<WorkflowStep, "id">) => {
+  const addStep = (step: Omit<WorkflowStep, "id" | "position">) => {
     setSteps((prev) => [
       ...prev,
-      { ...step, id: `step-${Date.now()}-${Math.random()}` },
+      { 
+        ...step, 
+        id: `step-${Date.now()}-${Math.random()}`,
+        position: { x: 100, y: 100 }
+      },
     ]);
   };
+  
+  const moveStep = (id: string, x: number, y: number) => {
+    setSteps((prev) =>
+      prev.map((step) => (step.id === id ? { ...step, position: { x, y } } : step))
+    );
+  };
+
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
       <div className="lg:col-span-2">
-        <WorkflowCanvas steps={steps} />
+        <WorkflowCanvas steps={steps} moveStep={moveStep} />
       </div>
        <div className="lg:col-span-1">
         <AiSuggestionPanel currentSteps={steps} addStep={addStep} />
