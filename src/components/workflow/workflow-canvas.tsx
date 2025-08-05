@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,7 @@ import { PlusCircle } from "lucide-react";
 import { WorkflowStepCard } from "./workflow-step-card";
 import { useDrop } from "react-dnd";
 import { NodeConnector } from "./node-connector";
-import { useRef } from "react";
+import { useRef, Fragment } from "react";
 
 
 type WorkflowCanvasProps = {
@@ -45,12 +46,12 @@ export function WorkflowCanvas({ steps, moveStep }: WorkflowCanvasProps) {
       <CardContent>
       <div ref={drop(canvasRef)} className="relative w-full h-[800px] border-2 border-dashed rounded-lg">
           {steps.map((step, index) => (
-            <>
-              <WorkflowStepCard key={step.id} step={step} />
+            <Fragment key={step.id}>
+              <WorkflowStepCard step={step} />
               {index < steps.length - 1 && (
                 <NodeConnector from={step} to={steps[index + 1]} />
               )}
-            </>
+            </Fragment>
           ))}
           {steps.length === 0 && (
             <div className="absolute inset-0 flex items-center justify-center">
