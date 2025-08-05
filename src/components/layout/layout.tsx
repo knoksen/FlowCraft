@@ -78,7 +78,7 @@ export default function Layout() {
             <WorkflowCanvas />
           </main>
           <aside className="w-96 border-l bg-background p-4">
-            {user && <ExecutionHistory userId={user.uid} />}
+            {user ? <ExecutionHistory userId={user.uid} /> : <div className="text-center text-muted-foreground pt-10">Please sign in to view execution history.</div>}
           </aside>
         </div>
       </div>

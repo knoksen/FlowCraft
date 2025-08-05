@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -15,7 +14,7 @@ type ExecutionHistoryProps = {
   userId: string;
 };
 
-const statusIcons = {
+const statusIcons: Record<string, React.ReactNode> = {
   success: <CheckCircle className="h-4 w-4 text-green-500" />,
   failed: <XCircle className="h-4 w-4 text-red-500" />,
   running: <Loader2 className="h-4 w-4 animate-spin text-blue-500" />,

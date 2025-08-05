@@ -46,7 +46,7 @@ export function Header() {
         title: "Not Signed In",
         description: "You must be signed in to save a workflow.",
       });
-      return;
+      return null;
     }
     
     setIsSaving(true);
@@ -92,8 +92,18 @@ export function Header() {
   }
   
   const handleRunWorkflow = async () => {
+      if (!user) {
+        toast({
+          variant: "destructive",
+          title: "Not Signed In",
+          description: "You must be signed in to run a workflow.",
+        });
+        return;
+      }
+      
       setIsRunning(true);
       
+      // We must save before we run to ensure we execute the latest version
       const savedWorkflowId = await handleSaveWorkflow();
       
       if (!savedWorkflowId) {
@@ -114,7 +124,7 @@ export function Header() {
       try {
           const result = await executeWorkflow({
               workflowId: savedWorkflowId,
-              userId: user!.uid,
+              userId: user.uid,
           });
           toast({
               title: "Execution Started",
