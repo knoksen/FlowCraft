@@ -1,7 +1,7 @@
 "use client";
 
 import type { WorkflowStep } from "@/lib/types";
-import { Database, Mail, UserPlus, Webhook, Bot } from "lucide-react";
+import { Database, Mail, UserPlus, Webhook } from "lucide-react";
 import { useState } from "react";
 import { AiSuggestionPanel } from "./ai-suggestion-panel";
 import { WorkflowCanvas } from "./workflow-canvas";

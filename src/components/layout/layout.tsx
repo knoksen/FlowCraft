@@ -9,6 +9,7 @@ import type { WorkflowStep } from "@/lib/types";
 import { Bot, Database, Mail, UserPlus, Webhook } from "lucide-react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { useToast } from "@/hooks/use-toast";
 
 const initialSteps: WorkflowStep[] = [
   {
@@ -48,6 +49,7 @@ const initialSteps: WorkflowStep[] = [
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [steps, setSteps] = useState<WorkflowStep[]>(initialSteps);
+  const { toast } = useToast();
 
   const addStep = (step: Omit<WorkflowStep, "id" | "position">) => {
     setSteps((prev) => [
@@ -58,6 +60,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         position: { x: 100, y: 100 },
       },
     ]);
+     toast({
+      title: "Step Added",
+      description: `The step "${step.title}" has been added to your workflow.`,
+    });
   };
   
   const moveStep = (id: string, x: number, y: number) => {
