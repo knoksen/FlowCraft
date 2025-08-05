@@ -28,8 +28,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, []);
 
+  if (loading) {
+    return null; // Or a loading spinner, but null is safest for hydration
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading: false }}>
       {children}
     </AuthContext.Provider>
   );
