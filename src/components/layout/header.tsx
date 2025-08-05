@@ -15,10 +15,15 @@ import {
 import { auth } from "@/lib/firebase";
 import { Bell, HelpCircle, LogIn, LogOut, User, Workflow, Save, Play, Bot } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useWorkflowStore } from "../workflow/workflowStore";
+import { useToast } from "@/hooks/use-toast";
+import { saveWorkflow } from "@/ai/flows/save-workflow";
 
 export function Header() {
   const { user } = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
+  const { nodes, edges } = useWorkflowStore();
 
   const handleSignOut = async () => {
     await auth.signOut();
@@ -27,6 +32,46 @@ export function Header() {
 
   const handleSignIn = () => {
     router.push('/signin');
+  }
+
+  const handleSaveWorkflow = async () => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Not Signed In",
+        description: "You must be signed in to save a workflow.",
+      });
+      return;
+    }
+    
+    toast({
+      title: "Saving...",
+      description: "Your workflow is being saved.",
+    });
+
+    try {
+      const result = await saveWorkflow({
+        userId: user.uid,
+        name: "My Awesome Workflow", // Placeholder name
+        nodes: nodes.map(n => ({...n, icon: undefined})), // remove icon component before saving
+        edges,
+      });
+
+      if (result.status === 'success') {
+        toast({
+          title: "Success!",
+          description: result.message,
+        });
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error Saving Workflow",
+        description: error.message || "An unexpected error occurred.",
+      });
+    }
   }
 
   return (
@@ -42,7 +87,7 @@ export function Header() {
                 <Bot size={16} className="mr-2" />
                 AI Assist
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleSaveWorkflow}>
                 <Save size={16} className="mr-2" />
                 Save
             </Button>

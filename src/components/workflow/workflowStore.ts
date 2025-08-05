@@ -16,7 +16,7 @@ type State = {
   connectingFrom: ConnectingFrom;
   selectedNodeId: string | null;
   initializeDefaultWorkflow: () => void;
-  addNode: (step: Omit<WorkflowStep, 'id' | 'config'>) => void;
+  addNode: (step: Omit<WorkflowStep, 'id' | 'position' | 'config'>) => void;
   moveNode: (id: string, delta: { x: number, y: number }) => void;
   deleteNode: (id: string) => void;
   selectNode: (id: string | null) => void;
@@ -24,7 +24,7 @@ type State = {
   addEdge: (edge: Omit<Edge, 'id'>) => void;
   removeEdge: (id: string) => void;
   startConnection: (nodeId: string, handle: 'source' | 'target') => void;
-  endConnection: () => void;
+  endConnection: (nodeId: string, handle: 'source' | 'target') => void;
 };
 
 export const useWorkflowStore = create<State>((set, get) => ({
@@ -51,6 +51,8 @@ export const useWorkflowStore = create<State>((set, get) => ({
       const newNode: WorkflowStep = {
         ...step,
         id: nanoid(),
+        position: { x: 200, y: 100 }, // Default position
+        config: null,
       };
       return { nodes: [...state.nodes, newNode] };
     }),
@@ -87,9 +89,13 @@ export const useWorkflowStore = create<State>((set, get) => ({
         // Prevent connection to self
         if (edge.source === edge.target) return {};
         
-        // Prevent connecting a source to another source
+        // Prevent connecting a source to another source (allow multiple targets from one source later if needed)
         const sourceHasOutgoing = state.edges.some(e => e.source === edge.source);
         if (sourceHasOutgoing) return {};
+        
+        // Prevent connecting a target that already has an incoming connection
+        const targetHasIncoming = state.edges.some(e => e.target === edge.target);
+        if (targetHasIncoming) return {};
 
         return {
             edges: [...state.edges, { ...edge, id: nanoid() }],
@@ -100,5 +106,13 @@ export const useWorkflowStore = create<State>((set, get) => ({
       edges: state.edges.filter((edge) => edge.id !== id),
     })),
     startConnection: (nodeId, handle) => set(() => ({ connectingFrom: { nodeId, handle } })),
-    endConnection: () => set(() => ({ connectingFrom: null })),
+    endConnection: (nodeId, handle) => {
+        const { connectingFrom, addEdge } = get();
+        if (connectingFrom && connectingFrom.nodeId !== nodeId && connectingFrom.handle !== handle) {
+            const source = connectingFrom.handle === 'source' ? connectingFrom.nodeId : nodeId;
+            const target = connectingFrom.handle === 'target' ? connectingFrom.nodeId : nodeId;
+            addEdge({ source, target });
+        }
+        set({ connectingFrom: null });
+    },
 }));

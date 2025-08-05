@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { FC } from 'react';
@@ -21,7 +22,7 @@ export const Node: FC<NodeProps> = ({ id, title, description, icon: Icon, iconCo
         deleteNode: state.deleteNode,
     }));
     
-    const isTarget = isConnecting && connectingFrom?.nodeId !== id;
+    const isPotentialTarget = isConnecting && connectingFrom?.nodeId !== id && connectingFrom?.handle === 'source';
     
     const handleNodeClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -41,10 +42,14 @@ export const Node: FC<NodeProps> = ({ id, title, description, icon: Icon, iconCo
     return (
         <Card
             onClick={handleNodeClick}
+            onMouseUp={(e) => { 
+                e.stopPropagation(); 
+                if (isPotentialTarget) onEndConnection(id, 'target');
+            }}
             className={cn(
                 "w-80 border-2 transition-all cursor-grab active:cursor-grabbing group",
                 selected ? "border-primary ring-2 ring-primary/30" : "border-border",
-                isTarget && "border-dashed border-primary"
+                isPotentialTarget && "border-dashed border-primary ring-2 ring-primary/30"
             )}
         >
             <CardHeader className="flex flex-row items-center gap-4 space-y-0 p-4">
@@ -72,7 +77,6 @@ export const Node: FC<NodeProps> = ({ id, title, description, icon: Icon, iconCo
                         "absolute top-1/2 -left-3 h-5 w-5 rounded-full bg-background border-2 border-primary cursor-crosshair -translate-y-1/2 transition-all",
                         isConnecting ? "opacity-100 scale-110" : "opacity-0 group-hover:opacity-100"
                     )}
-                    onMouseDown={(e) => { e.stopPropagation(); onStartConnection(id, 'target'); }}
                     onMouseUp={(e) => { e.stopPropagation(); onEndConnection(id, 'target'); }}
                 />
             )}
@@ -82,7 +86,6 @@ export const Node: FC<NodeProps> = ({ id, title, description, icon: Icon, iconCo
                     isConnecting ? "opacity-100 scale-110" : "opacity-0 group-hover:opacity-100"
                 )}
                 onMouseDown={(e) => { e.stopPropagation(); onStartConnection(id, 'source'); }}
-                onMouseUp={(e) => { e.stopPropagation(); onEndConnection(id, 'source'); }}
             />
         </Card>
     );
