@@ -50,10 +50,13 @@ export function Header() {
     });
 
     try {
+      // Note: LucideIcon component cannot be serialized, so we remove it.
+      const nodesToSave = nodes.map(({ icon, ...restarted }) => restarted);
+      
       const result = await saveWorkflow({
         userId: user.uid,
         name: "My Awesome Workflow", // Placeholder name
-        nodes: nodes.map(n => ({...n, icon: undefined})), // remove icon component before saving
+        nodes: nodesToSave,
         edges,
       });
 
