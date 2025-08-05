@@ -12,9 +12,10 @@
 
 import { ai } from '@/ai/genkit';
 import { db } from '@/lib/firebase-admin';
-import type { WorkflowStep } from '@/lib/types';
+import type { WorkflowStep, HttpStepConfig, LocalCommandStepConfig } from '@/lib/types';
 import axios from 'axios';
 import { z } from 'genkit';
+import { FieldValue } from 'firebase-admin/firestore';
 
 const ExecuteWorkflowInputSchema = z.object({
   workflowId: z.string().describe('The ID of the workflow to execute.'),
@@ -24,16 +25,17 @@ export type ExecuteWorkflowInput = z.infer<typeof ExecuteWorkflowInputSchema>;
 
 const ExecuteWorkflowOutputSchema = z.object({
   executionId: z.string().describe('The ID of the execution log document.'),
-  status: z.enum(['success', 'failed']).describe('The final status of the workflow execution.'),
+  status: z.enum(['success', 'failed', 'running']).describe('The final status of the workflow execution.'),
 });
 export type ExecuteWorkflowOutput = z.infer<typeof ExecuteWorkflowOutputSchema>;
 
 // This type is internal to the flow and doesn't need to be exported.
-type StepLog = {
+export type StepLog = {
   stepId: string;
-  status: 'success' | 'failed';
+  status: 'success' | 'failed' | 'running' | 'pending';
   output?: any;
   error?: string;
+  jobId?: string; // To link to a job for local execution
 };
 
 export async function executeWorkflow(
@@ -51,7 +53,6 @@ const executeWorkflowFlow = ai.defineFlow(
   async ({ workflowId, userId }) => {
     const startedAt = new Date();
 
-    // 1. Fetch the workflow document
     const workflowRef = db.collection('workflows').doc(workflowId);
     const workflowDoc = await workflowRef.get();
     if (!workflowDoc.exists) {
@@ -59,16 +60,8 @@ const executeWorkflowFlow = ai.defineFlow(
     }
     const workflow = workflowDoc.data() as { steps: WorkflowStep[] };
 
-    // 2. Sort steps by order if an 'order' property exists, otherwise use array order.
-    const steps = workflow.steps.sort((a, b) => {
-        // A simple sort assuming an 'order' property might exist in the future.
-        // For now, it respects the stored array order if 'order' is missing.
-        const orderA = (a as any).order ?? 0;
-        const orderB = (b as any).order ?? 0;
-        return orderA - orderB;
-    });
+    const steps = workflow.steps.sort((a, b) => a.position.y - b.position.y);
 
-    // 3. Create an initial execution log document
     const executionLogRef = db.collection('executionLogs').doc();
     await executionLogRef.set({
       workflowId,
@@ -78,52 +71,78 @@ const executeWorkflowFlow = ai.defineFlow(
       logs: [],
     });
 
-    const executionLogs: StepLog[] = [];
-    let finalStatus: 'success' | 'failed' = 'success';
+    let overallStatus: 'success' | 'failed' | 'running' = 'running';
+    let pendingJobs = 0;
 
-    // 4. Iterate over steps and execute them
     for (const step of steps) {
-      // For now, we only handle 'http' type steps as a proof of concept.
-      // This can be extended for other step types.
-      if ((step as any).type === 'http') {
+        const stepLog: Partial<StepLog> & { stepId: string } = {
+            stepId: step.id,
+            status: 'pending',
+        };
+
         try {
-          const response = await axios((step as any).config);
-          executionLogs.push({
-            stepId: step.id,
-            status: 'success',
-            output: response.data,
-          });
+            switch (step.type) {
+                case 'http':
+                    const httpConfig = step.config as HttpStepConfig;
+                    const response = await axios(httpConfig);
+                    stepLog.status = 'success';
+                    stepLog.output = response.data;
+                    break;
+                
+                case 'local_command':
+                    const localConfig = step.config as LocalCommandStepConfig;
+                    const jobRef = db.collection('jobs').doc();
+                    
+                    await jobRef.set({
+                        workflowId,
+                        executionId: executionLogRef.id,
+                        stepId: step.id,
+                        userId,
+                        config: localConfig,
+                        status: 'pending',
+                        createdAt: FieldValue.serverTimestamp(),
+                    });
+
+                    stepLog.status = 'running';
+                    stepLog.jobId = jobRef.id;
+                    pendingJobs++;
+                    break;
+
+                case 'placeholder':
+                    stepLog.status = 'success';
+                    stepLog.output = 'This is a placeholder step and was skipped.';
+                    break;
+
+                default:
+                    throw new Error(`Unsupported step type: ${step.type}`);
+            }
         } catch (error: any) {
-          finalStatus = 'failed';
-          executionLogs.push({
-            stepId: step.id,
-            status: 'failed',
-            error: error.message,
-          });
-          // Stop execution on failure
-          break;
+            stepLog.status = 'failed';
+            stepLog.error = error.message;
+            overallStatus = 'failed';
         }
-      } else {
-        // For non-http steps, we'll just log a success for now.
-        // This can be expanded later.
-         executionLogs.push({
-            stepId: step.id,
-            status: 'success',
-            output: 'Step type not yet implemented, marked as success.',
-          });
-      }
+
+        await executionLogRef.update({
+            logs: FieldValue.arrayUnion(stepLog),
+        });
+
+        if (overallStatus === 'failed') {
+            break; 
+        }
+    }
+    
+    if (overallStatus !== 'failed') {
+        overallStatus = pendingJobs > 0 ? 'running' : 'success';
     }
 
-    // 5. Update the execution log with the final results
     await executionLogRef.update({
-      finishedAt: new Date(),
-      status: finalStatus,
-      logs: executionLogs,
+        status: overallStatus,
+        finishedAt: overallStatus !== 'running' ? new Date() : null,
     });
-
+    
     return {
       executionId: executionLogRef.id,
-      status: finalStatus,
+      status: overallStatus,
     };
   }
 );

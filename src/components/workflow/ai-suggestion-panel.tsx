@@ -31,7 +31,7 @@ import { z } from "zod";
 
 type AISuggestionPanelProps = {
   currentSteps: WorkflowStep[];
-  addStep: (step: Omit<WorkflowStep, "id">) => void;
+  addStep: (step: Omit<WorkflowStep, "id" | "position">) => void;
 };
 
 const formSchema = z.object({
@@ -93,6 +93,8 @@ export function AiSuggestionPanel({
         description: suggestion.reasoning,
         icon: Bot,
         iconColor: "text-orange-500",
+        type: "placeholder",
+        config: null
       });
       setSuggestion(null);
     }

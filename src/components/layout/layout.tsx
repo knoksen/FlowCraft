@@ -19,6 +19,8 @@ const initialSteps: WorkflowStep[] = [
     icon: UserPlus,
     iconColor: "text-green-500",
     position: { x: 50, y: 50 },
+    type: "placeholder",
+    config: null,
   },
   {
     id: "2",
@@ -27,6 +29,8 @@ const initialSteps: WorkflowStep[] = [
     icon: Mail,
     iconColor: "text-blue-500",
     position: { x: 450, y: 150 },
+    type: "placeholder",
+    config: null,
   },
   {
     id: "3",
@@ -35,6 +39,8 @@ const initialSteps: WorkflowStep[] = [
     icon: Database,
     iconColor: "text-purple-500",
     position: { x: 50, y: 250 },
+    type: "placeholder",
+    config: null,
   },
   {
     id: "4",
@@ -43,6 +49,8 @@ const initialSteps: WorkflowStep[] = [
     icon: Webhook,
     iconColor: "text-slate-500",
     position: { x: 450, y: 350 },
+    type: "placeholder",
+    config: null,
   },
 ];
 
