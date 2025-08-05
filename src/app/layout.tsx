@@ -16,8 +16,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
-      <body className="font-sans bg-gray-50 text-gray-900 antialiased" suppressHydrationWarning>
+    <html lang="en" className="dark">
+      <body className="font-sans bg-gray-50 text-gray-900 antialiased">
         <AuthProvider>
           {children}
           <Toaster />
