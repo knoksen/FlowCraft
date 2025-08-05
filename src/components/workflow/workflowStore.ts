@@ -9,16 +9,26 @@ type Node = {
   type: string;
 };
 
+type Edge = {
+  id: string;
+  source: string;
+  target: string;
+};
+
 type State = {
   nodes: Node[];
+  edges: Edge[];
   hydrated: boolean;
   setNodes: (nodes: Node[]) => void;
   addNode: () => void;
   moveNode: (id: string, x: number, y: number) => void;
+  addEdge: (edge: Omit<Edge, 'id'>) => void;
+  removeEdge: (id: string) => void;
 };
 
 export const useWorkflowStore = create<State>((set) => ({
   nodes: [],
+  edges: [],
   hydrated: false,
   setNodes: (nodes) => set(() => ({ nodes, hydrated: true })),
   addNode: () =>
@@ -42,5 +52,13 @@ export const useWorkflowStore = create<State>((set) => ({
       nodes: state.nodes.map((node) =>
         node.id === id ? { ...node, x, y } : node
       ),
+    })),
+  addEdge: (edge) =>
+    set((state) => ({
+      edges: [...state.edges, { ...edge, id: `${edge.source}-${edge.target}` }],
+    })),
+  removeEdge: (id) =>
+    set((state) => ({
+      edges: state.edges.filter((edge) => edge.id !== id),
     })),
 }));
