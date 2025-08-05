@@ -1,33 +1,26 @@
+
 import React from 'react';
 import type { WorkflowStep } from '@/lib/types';
 
-type NodeConnectorProps = {
-  from: WorkflowStep;
-  to: WorkflowStep;
-};
-
-const CARD_WIDTH = 350;
+const CARD_WIDTH = 320; // w-80
 const CARD_HEIGHT = 92; // Based on p-4 header and content inside
 
-export function NodeConnector({ from, to }: NodeConnectorProps) {
-  const fromX = from.position.x + CARD_WIDTH / 2;
-  const fromY = from.position.y + CARD_HEIGHT;
-  const toX = to.position.x + CARD_WIDTH / 2;
-  const toY = to.position.y;
+export function NodeConnector({ from, to }: { from: WorkflowStep; to: WorkflowStep }) {
+  const fromX = from.position.x + CARD_WIDTH;
+  const fromY = from.position.y + CARD_HEIGHT / 2;
+  const toX = to.position.x;
+  const toY = to.position.y + CARD_HEIGHT / 2;
 
-  const path = `M ${fromX} ${fromY} C ${fromX} ${fromY + 50}, ${toX} ${toY - 50}, ${toX} ${toY}`;
+  // Bezier curve control points for a nice smooth curve
+  const c1X = fromX + 60;
+  const c1Y = fromY;
+  const c2X = toX - 60;
+  const c2Y = toY;
+
+  const path = `M ${fromX} ${fromY} C ${c1X} ${c1Y}, ${c2X} ${c2Y}, ${toX} ${toY}`;
 
   return (
-    <svg
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        pointerEvents: 'none',
-      }}
-    >
+    <>
       <path
         d={path}
         stroke="hsl(var(--border))"
@@ -48,6 +41,6 @@ export function NodeConnector({ from, to }: NodeConnectorProps) {
           <path d="M 0 0 L 10 5 L 0 10 z" fill="hsl(var(--border))" />
         </marker>
       </defs>
-    </svg>
+    </>
   );
 }

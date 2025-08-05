@@ -1,4 +1,7 @@
+
 import type { LucideIcon } from "lucide-react";
+
+export type StepType = 'http' | 'local_command' | 'placeholder' | 'trigger' | 'action' | 'delay';
 
 export type HttpStepConfig = {
   url: string;
@@ -21,8 +24,7 @@ export type WorkflowStep = {
   icon: LucideIcon;
   iconColor?: string;
   position: { x: number; y: number };
-  // Adding type and config for different step types
-  type: 'http' | 'local_command' | 'placeholder';
+  type: StepType;
   config: HttpStepConfig | LocalCommandStepConfig | null;
 };
 

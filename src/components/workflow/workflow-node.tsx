@@ -2,50 +2,63 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
-import { GripVertical, Play, Trash } from 'lucide-react';
-import { useWorkflowStore, Node as NodeType } from './workflowStore';
+import { GripVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { WorkflowStep } from '@/lib/types';
+import { useDraggable } from '@dnd-kit/core';
+import { Card, CardDescription, CardHeader, CardTitle } from '../ui/card';
 
-export type NodeProps = NodeType & {
-  selected?: boolean;
+type NodeProps = WorkflowStep & {
+  isOverlay?: boolean;
 };
 
-export function Node({ id, title, description, x, y, selected }: NodeProps) {
-  const updateNodePosition = useWorkflowStore((s) => s.updateNodePosition);
+export function Node({ id, title, description, icon: Icon, iconColor, position, isOverlay }: NodeProps) {
+    const { attributes, listeners, setNodeRef, transform } = useDraggable({
+        id: id,
+        data: {
+            node: { id, title, description, icon: Icon, iconColor, position },
+            isSidebarItem: false,
+        }
+    });
+
+    const style = transform ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+        position: 'absolute',
+        left: position.x,
+        top: position.y,
+    } : {
+        position: 'absolute',
+        left: position.x,
+        top: position.y,
+    };
 
   return (
-    <motion.div
-      drag
-      dragMomentum={false}
-      onDragEnd={(_, info) => {
-        updateNodePosition(id, x + info.offset.x, y + info.offset.y);
-      }}
-      className={cn(
-        "relative p-4 rounded-2xl shadow-md bg-gradient-to-tr from-card to-muted/50 border text-card-foreground cursor-grab active:cursor-grabbing",
-        selected ? "ring-2 ring-primary" : ""
-      )}
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn("w-80", isOverlay ? "z-50" : "z-10")}
     >
-      <Handle position="left" />
-      <div className="flex items-center gap-2 mb-2">
-        <GripVertical className="text-muted-foreground" size={18} />
-        <span className="font-semibold text-lg">{title}</span>
-      </div>
-      <p className="text-sm text-muted-foreground mb-4">{description}</p>
-      <div className="flex items-center gap-2">
-        <button className="text-primary hover:text-primary/80"><Play size={18}/></button>
-        <button className="text-destructive hover:text-destructive/80"><Trash size={18}/></button>
-      </div>
-      <Handle position="right" />
-    </motion.div>
+      <Card
+        className={cn(
+            "group transition-all hover:shadow-lg hover:border-primary/50",
+            isOverlay && "shadow-2xl"
+        )}
+      >
+        <CardHeader className="flex flex-row items-start gap-4 space-y-0 p-4">
+          <div {...listeners} {...attributes} className="flex items-center h-full cursor-grab active:cursor-grabbing">
+            <GripVertical className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+          </div>
+          <div className="flex-shrink-0">
+            <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+              <Icon className={cn("w-5 h-5", iconColor || "text-foreground")} />
+            </div>
+          </div>
+          <div className="flex-1">
+            <CardTitle className="text-base">{title}</CardTitle>
+            <CardDescription className="mt-1 text-xs">{description}</CardDescription>
+          </div>
+        </CardHeader>
+      </Card>
+    </div>
   );
 };
-
-export const Handle = ({ position = "right" }) => (
-  <div
-    className={cn(
-      "absolute w-3 h-3 rounded-full bg-primary border-2 border-card shadow",
-      position === "right" ? "right-[-6px] top-1/2 -translate-y-1/2" : "left-[-6px] top-1/2 -translate-y-1/2"
-    )}
-  />
-);

@@ -1,14 +1,8 @@
 
 import { create } from "zustand";
 import { nanoid } from "nanoid";
-
-export type Node = {
-  id: string;
-  title: string;
-  description: string;
-  x: number;
-  y: number;
-};
+import type { WorkflowStep } from "@/lib/types";
+import { AVAILABLE_STEPS } from "@/lib/steps";
 
 export type Edge = {
     source: string;
@@ -16,26 +10,22 @@ export type Edge = {
 }
 
 type WorkflowState = {
-  nodes: Node[];
+  nodes: WorkflowStep[];
   edges: Edge[];
-  addNode: (node: Omit<Node, 'id' | 'x' | 'y'>) => void;
-  updateNodePosition: (id: string, x: number, y: number) => void;
+  addNode: (node: Omit<WorkflowStep, "position"> & { position?: { x: number; y: number } }) => void;
+  moveNode: (id: string, delta: { x: number; y: number }) => void;
 };
 
-const initialNodes: Node[] = [
+const initialNodes: WorkflowStep[] = [
     {
-      id: "1",
-      title: "Initial Step",
-      description: "This is the first step in your workflow.",
-      x: 100,
-      y: 150,
+        id: "1",
+        ...AVAILABLE_STEPS[0], // New User Signup
+        position: { x: 50, y: 50 },
     },
     {
-      id: "2",
-      title: "Second Step",
-      description: "This is another step.",
-      x: 400,
-      y: 250,
+        id: "2",
+        ...AVAILABLE_STEPS[1], // Send Welcome Email
+        position: { x: 50, y: 200 },
     },
 ];
 
@@ -52,16 +42,17 @@ export const useWorkflowStore = create<WorkflowState>((set) => ({
         ...state.nodes,
         {
           ...node,
-          id: nanoid(),
-          x: 100 + 50 * (state.nodes.length % 5),
-          y: 100 + 30 * (state.nodes.length % 5),
+          position: node.position ?? {
+              x: 100 + 50 * (state.nodes.length % 5),
+              y: 100 + 30 * (state.nodes.length % 5),
+          },
         },
       ],
     })),
-  updateNodePosition: (id, x, y) =>
+  moveNode: (id, delta) =>
     set((state) => ({
       nodes: state.nodes.map((node) =>
-        node.id === id ? { ...node, x, y } : node
+        node.id === id ? { ...node, position: { x: node.position.x + delta.x, y: node.position.y + delta.y } } : node
       ),
     })),
 }));
