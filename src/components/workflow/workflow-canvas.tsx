@@ -1,7 +1,8 @@
 
 'use client';
 
-import { DndContext, useSensor, useSensors, PointerSensor, type DragEndEvent } from '@dnd-kit/core';
+import { useEffect } from 'react';
+import { useSensor, useSensors, PointerSensor, type DragEndEvent } from '@dnd-kit/core';
 import { useWorkflowStore } from './workflowStore';
 import { Node } from './workflow-node';
 import { Plus } from 'lucide-react';
@@ -9,11 +10,21 @@ import { NodeConnector } from './connector';
 import { NodeConfigModal } from './node-config-modal';
 
 export default function WorkflowCanvas() {
-  const nodes = useWorkflowStore((s) => s.nodes);
-  const edges = useWorkflowStore((s) => s.edges);
-  const addNode = useWorkflowStore((s) => s.addNode);
-  const moveNode = useWorkflowStore((s) => s.moveNode);
-  const selectNode = useWorkflowStore((s) => s.selectNode);
+  const { nodes, edges, addNode, moveNode, selectNode, hydrated, initializeDefaultWorkflow } = useWorkflowStore(s => ({
+    nodes: s.nodes,
+    edges: s.edges,
+    addNode: s.addNode,
+    moveNode: s.moveNode,
+    selectNode: s.selectNode,
+    hydrated: s.hydrated,
+    initializeDefaultWorkflow: s.initializeDefaultWorkflow,
+  }));
+
+  useEffect(() => {
+    if (!hydrated) {
+      initializeDefaultWorkflow();
+    }
+  }, [hydrated, initializeDefaultWorkflow]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

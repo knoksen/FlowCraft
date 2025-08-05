@@ -21,8 +21,10 @@ type WorkflowState = {
   edges: Edge[];
   selectedNodeId: string | null;
   loading: boolean;
+  hydrated: boolean;
   unsubscribe: () => void;
   loadOrCreateWorkflow: (userId: string, workflowId: string) => Promise<void>;
+  initializeDefaultWorkflow: () => void;
   addNode: () => void;
   moveNode: (id: string, delta: { x: number; y: number }) => void;
   selectNode: (id: string | null) => void;
@@ -38,27 +40,27 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
   edges: [],
   selectedNodeId: null,
   loading: true,
+  hydrated: false,
   unsubscribe: () => {},
 
   loadOrCreateWorkflow: async (userId, workflowId) => {
     const { unsubscribe } = get();
-    unsubscribe(); // Unsubscribe from any previous listener
+    unsubscribe(); 
 
     set({ loading: true });
     const workflowRef = doc(db, 'workflows', workflowId);
     
-    // Set up the real-time listener
     const newUnsubscribe = onSnapshot(workflowRef, (docSnap) => {
       if (docSnap.exists()) {
         const workflowData = docSnap.data() as Workflow;
         set({
           workflow: workflowData,
-          nodes: workflowData.steps,
-          edges: workflowData.edges,
+          nodes: workflowData.steps || [],
+          edges: workflowData.edges || [],
           loading: false,
+          hydrated: true,
         });
       } else {
-        // Document doesn't exist, create it
         const newWorkflow: Workflow = {
           id: workflowId,
           name: 'My First Workflow',
@@ -68,7 +70,7 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
           steps: [
             {
               ...AVAILABLE_STEPS[0],
-              id: 'start-node',
+              id: nanoid(),
               position: { x: 50, y: 150 },
               config: null
             },
@@ -81,6 +83,7 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
             nodes: newWorkflow.steps,
             edges: newWorkflow.edges,
             loading: false,
+            hydrated: true,
           });
         });
       }
@@ -92,10 +95,23 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
     set({ unsubscribe: newUnsubscribe });
   },
 
+  initializeDefaultWorkflow: () => {
+    if (get().hydrated) return;
+    set({
+        nodes: [
+            {
+              ...AVAILABLE_STEPS[0],
+              id: nanoid(),
+              position: { x: 50, y: 150 },
+              config: null
+            },
+        ],
+        hydrated: true
+    })
+  },
+
   addNode: async () => {
     const { workflow } = get();
-    if (!workflow) return;
-
     const newNodeType = AVAILABLE_STEPS.find(s => s.type === 'local_command') || AVAILABLE_STEPS[3];
     const newNode: WorkflowStep = {
         id: nanoid(),
@@ -108,6 +124,11 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
         config: null,
     };
     
+    if (!workflow) {
+      set(state => ({ nodes: [...state.nodes, newNode] }));
+      return;
+    };
+
     const workflowRef = doc(db, 'workflows', workflow.id);
     await updateDoc(workflowRef, {
       steps: arrayUnion(newNode),
@@ -117,7 +138,6 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
   moveNode: async (id, delta) => {
     const { workflow, nodes } = get();
-    if (!workflow) return;
 
     const targetNode = nodes.find(n => n.id === id);
     if (!targetNode) return;
@@ -130,6 +150,11 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
     const updatedNodes = nodes.map(n => 
         n.id === id ? { ...n, position: newPosition } : n
     );
+
+    if (!workflow) {
+        set({ nodes: updatedNodes });
+        return;
+    }
 
     const workflowRef = doc(db, 'workflows', workflow.id);
     await updateDoc(workflowRef, {
@@ -144,12 +169,16 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
   updateNodeConfig: async (id, config) => {
     const { workflow, nodes } = get();
-    if (!workflow) return;
 
     const updatedNodes = nodes.map(n => 
         n.id === id ? { ...n, config } : n
     );
     
+    if (!workflow) {
+        set({ nodes: updatedNodes });
+        return;
+    }
+
     const workflowRef = doc(db, 'workflows', workflow.id);
     await updateDoc(workflowRef, {
       steps: updatedNodes,
