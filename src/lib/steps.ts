@@ -2,14 +2,13 @@
 import { Code, Database, Mail, UserPlus, Webhook } from "lucide-react";
 import type { WorkflowStep } from "./types";
 
-export const AVAILABLE_STEPS: Omit<WorkflowStep, 'id' | 'position'>[] = [
+export const AVAILABLE_STEPS: Omit<WorkflowStep, 'id' | 'position' | 'config'>[] = [
   {
     title: "New User Signup",
     description: "Triggered when a new user signs up.",
     icon: UserPlus,
     iconColor: "text-green-500",
     type: 'trigger',
-    config: null,
   },
   {
     title: "Send Welcome Email",
@@ -17,7 +16,6 @@ export const AVAILABLE_STEPS: Omit<WorkflowStep, 'id' | 'position'>[] = [
     icon: Mail,
     iconColor: "text-blue-500",
     type: 'action',
-    config: null,
   },
   {
     title: "Add to CRM",
@@ -25,7 +23,6 @@ export const AVAILABLE_STEPS: Omit<WorkflowStep, 'id' | 'position'>[] = [
     icon: Database,
     iconColor: "text-purple-500",
     type: 'action',
-    config: null,
   },
   {
     title: "Notify Sales Team",
@@ -33,7 +30,6 @@ export const AVAILABLE_STEPS: Omit<WorkflowStep, 'id' | 'position'>[] = [
     icon: Webhook,
     iconColor: "text-slate-500",
     type: 'action',
-    config: null,
   },
     {
     title: "Run Local Script",
@@ -41,6 +37,5 @@ export const AVAILABLE_STEPS: Omit<WorkflowStep, 'id' | 'position'>[] = [
     icon: Code,
     iconColor: "text-orange-500",
     type: 'local_command',
-    config: null,
   },
 ];
