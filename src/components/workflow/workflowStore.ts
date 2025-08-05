@@ -32,14 +32,13 @@ export const useWorkflowStore = create<WorkflowState>((set) => ({
       y: 250,
     },
   ],
-  addNode: () =>
+  addNode: (node) =>
     set((state) => ({
       nodes: [
         ...state.nodes,
         {
+          ...node,
           id: nanoid(),
-          title: "New Node",
-          description: "A new step",
           x: 100 + 50 * (state.nodes.length % 5),
           y: 100 + 30 * (state.nodes.length % 5),
         },

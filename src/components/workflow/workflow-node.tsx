@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { FC } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { GripVertical, Play, Trash } from 'lucide-react';
 import { useWorkflowStore, Node as NodeType } from './workflowStore';
@@ -22,11 +22,11 @@ export function Node({ id, title, description, x, y, selected }: NodeProps) {
         updateNodePosition(id, x + info.offset.x, y + info.offset.y);
       }}
       className={cn(
-        "p-4 rounded-2xl shadow-md bg-gradient-to-tr from-card to-muted/50 border text-card-foreground",
+        "p-4 rounded-2xl shadow-md bg-gradient-to-tr from-card to-muted/50 border text-card-foreground cursor-grab active:cursor-grabbing",
         selected ? "ring-2 ring-primary" : ""
       )}
     >
-      <div className="flex items-center gap-2 mb-2 cursor-grab">
+      <div className="flex items-center gap-2 mb-2">
         <GripVertical className="text-muted-foreground" size={18} />
         <span className="font-semibold text-lg">{title}</span>
       </div>
