@@ -20,10 +20,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
-const httpConfigSchema = z.object({
-  url: z.string().url({ message: 'Please enter a valid URL.' }),
-  method: z.enum(['GET', 'POST', 'PUT', 'DELETE']),
-  headers: z.string().optional().refine((val) => {
+const jsonStringOrObject = z.union([
+  z.string().refine((val) => {
     if (!val || val.trim() === '') return true;
     try {
       JSON.parse(val);
@@ -32,15 +30,15 @@ const httpConfigSchema = z.object({
       return false;
     }
   }, { message: 'Headers must be valid JSON.' }),
-  body: z.string().optional().refine((val) => {
-    if (!val || val.trim() === '') return true;
-    try {
-      JSON.parse(val);
-      return true;
-    } catch {
-      return false;
-    }
-  }, { message: 'Body must be valid JSON.' }),
+  z.record(z.any())
+]).optional();
+
+
+const httpConfigSchema = z.object({
+  url: z.string().url({ message: 'Please enter a valid URL.' }),
+  method: z.enum(['GET', 'POST', 'PUT', 'DELETE']),
+  headers: jsonStringOrObject,
+  body: jsonStringOrObject,
 });
 
 const localCommandConfigSchema = z.object({
@@ -85,7 +83,7 @@ const HttpConfigForm = () => {
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a method" />
-                </SelectTrigger>
+                </Trigger>
               </FormControl>
               <SelectContent>
                 <SelectItem value="GET">GET</SelectItem>
