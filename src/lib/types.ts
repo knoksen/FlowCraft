@@ -25,3 +25,28 @@ export type WorkflowStep = {
   type: 'http' | 'local_command' | 'placeholder';
   config: HttpStepConfig | LocalCommandStepConfig | null;
 };
+
+export type Workflow = {
+    id: string;
+    name: string;
+    steps: WorkflowStep[];
+    userId: string;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export type ExecutionLog = {
+    id: string;
+    workflowId: string;
+    userId: string;
+    startedAt: Date; 
+    finishedAt?: Date; 
+    status: 'running' | 'success' | 'failed';
+    logs: {
+        stepId: string;
+        status: 'success' | 'failed' | 'running' | 'pending';
+        output?: any;
+        error?: string;
+        jobId?: string;
+    }[];
+};

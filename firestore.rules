@@ -1,0 +1,25 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users can only read/write their own workflows
+    match /workflows/{userId}-{workflowId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Users can create execution logs for their own workflows
+    match /executionLogs/{logId} {
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      // Only allow reads by the user who owns it
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      // Backend functions update the status, not the user directly
+      allow update: if false; 
+    }
+
+    // Backend functions will create jobs
+    match /jobs/{jobId} {
+        allow read, write: if false; // TBD: Allow authenticated local agents
+    }
+  }
+}
