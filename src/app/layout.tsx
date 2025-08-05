@@ -1,7 +1,7 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
-import '@fontsource/inter/variable.css';
+import '@fontsource/inter/index.css';
 
 export const metadata: Metadata = {
   title: 'FlowCraft',
