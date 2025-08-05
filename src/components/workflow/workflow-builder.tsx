@@ -1,7 +1,7 @@
 "use client";
 
 import type { WorkflowStep } from "@/lib/types";
-import { Database, Mail, UserPlus, Webhook } from "lucide-react";
+import { Database, Mail, UserPlus, Webhook, Bot } from "lucide-react";
 import { useState } from "react";
 import { AiSuggestionPanel } from "./ai-suggestion-panel";
 import { WorkflowCanvas } from "./workflow-canvas";
@@ -49,11 +49,11 @@ export function WorkflowBuilder() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-      <div className="lg:col-span-1">
-        <AiSuggestionPanel currentSteps={steps} addStep={addStep} />
-      </div>
       <div className="lg:col-span-2">
         <WorkflowCanvas steps={steps} />
+      </div>
+       <div className="lg:col-span-1">
+        <AiSuggestionPanel currentSteps={steps} addStep={addStep} />
       </div>
     </div>
   );

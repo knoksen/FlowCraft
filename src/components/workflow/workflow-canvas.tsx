@@ -12,7 +12,7 @@ type WorkflowCanvasProps = {
 
 export function WorkflowCanvas({ steps }: WorkflowCanvasProps) {
   return (
-    <Card className="shadow-lg">
+    <Card className="shadow-lg min-h-full">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Your Workflow</CardTitle>
         <Button variant="outline">
