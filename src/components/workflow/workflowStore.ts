@@ -15,21 +15,30 @@ type Edge = {
   target: string;
 };
 
+type ConnectingFrom = {
+    nodeId: string;
+    handle: 'source' | 'target';
+} | null;
+
 type State = {
   nodes: Node[];
   edges: Edge[];
   hydrated: boolean;
+  connectingFrom: ConnectingFrom;
   setNodes: (nodes: Node[]) => void;
   addNode: () => void;
   moveNode: (id: string, x: number, y: number) => void;
   addEdge: (edge: Omit<Edge, 'id'>) => void;
   removeEdge: (id: string) => void;
+  startConnection: (nodeId: string, handle: 'source' | 'target') => void;
+  endConnection: () => void;
 };
 
 export const useWorkflowStore = create<State>((set) => ({
   nodes: [],
   edges: [],
   hydrated: false,
+  connectingFrom: null,
   setNodes: (nodes) => set(() => ({ nodes, hydrated: true })),
   addNode: () =>
     set((state) => {
@@ -61,4 +70,6 @@ export const useWorkflowStore = create<State>((set) => ({
     set((state) => ({
       edges: state.edges.filter((edge) => edge.id !== id),
     })),
+    startConnection: (nodeId, handle) => set(() => ({ connectingFrom: { nodeId, handle } })),
+    endConnection: () => set(() => ({ connectingFrom: null })),
 }));
