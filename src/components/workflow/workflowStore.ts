@@ -11,7 +11,7 @@ export type Edge = {
 type WorkflowState = {
   nodes: WorkflowStep[];
   edges: Edge[];
-  addNode: (node: Omit<WorkflowStep, "position"> & { position?: { x: number; y: number } }) => void;
+  addNode: (node: WorkflowStep) => void;
   moveNode: (id: string, delta: { x: number; y: number }) => void;
 };
 
@@ -40,16 +40,7 @@ export const useWorkflowStore = create<WorkflowState>((set) => ({
         return state;
       }
       return {
-        nodes: [
-          ...state.nodes,
-          {
-            ...node,
-            position: node.position ?? {
-                x: 100 + 50 * (state.nodes.length % 5),
-                y: 100 + 30 * (state.nodes.length % 5),
-            },
-          },
-        ],
+        nodes: [...state.nodes, node],
       }
     }),
   moveNode: (id, delta) =>

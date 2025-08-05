@@ -22,12 +22,10 @@ export function Node({ id, title, description, icon: Icon, iconColor, position, 
     });
 
     const style = transform ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-        position: 'absolute',
-        left: position.x,
-        top: position.y,
+        transform: `translate3d(${position.x + transform.x}px, ${position.y + transform.y}px, 0)`,
+        position: 'absolute' as const,
     } : {
-        position: 'absolute',
+        position: 'absolute' as const,
         left: position.x,
         top: position.y,
     };
