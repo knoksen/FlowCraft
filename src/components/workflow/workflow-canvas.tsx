@@ -1,8 +1,9 @@
+
 'use client';
 
+import { DndContext, useSensor, useSensors, PointerSensor, type DragEndEvent } from '@dnd-kit/core';
 import { useWorkflowStore } from './workflowStore';
 import { Node } from './workflow-node';
-import { DndContext, useSensor, useSensors, PointerSensor, type DragEndEvent } from '@dnd-kit/core';
 import { Plus } from 'lucide-react';
 import { NodeConnector } from './node-connector';
 import { NodeConfigModal } from './node-config-modal';
