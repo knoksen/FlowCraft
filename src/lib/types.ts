@@ -50,8 +50,8 @@ export type ExecutionLog = {
     id: string;
     workflowId: string;
     userId: string;
-    startedAt: Date; 
-    finishedAt?: Date; 
+    startedAt: Date;
+    finishedAt?: Date;
     status: 'running' | 'success' | 'failed';
     logs: {
         stepId: string;
