@@ -6,4 +6,5 @@ export type WorkflowStep = {
   description: string;
   icon: LucideIcon;
   iconColor?: string;
+  position: { x: number; y: number };
 };

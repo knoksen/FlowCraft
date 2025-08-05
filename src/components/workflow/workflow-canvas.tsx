@@ -5,12 +5,34 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { WorkflowStep } from "@/lib/types";
 import { PlusCircle } from "lucide-react";
 import { WorkflowStepCard } from "./workflow-step-card";
+import { useDrop } from "react-dnd";
+import { NodeConnector } from "./node-connector";
+import { useRef } from "react";
+
 
 type WorkflowCanvasProps = {
   steps: WorkflowStep[];
+  moveStep: (id: string, x: number, y: number) => void;
 };
 
-export function WorkflowCanvas({ steps }: WorkflowCanvasProps) {
+export function WorkflowCanvas({ steps, moveStep }: WorkflowCanvasProps) {
+    const canvasRef = useRef<HTMLDivElement>(null);
+  
+    const [, drop] = useDrop(
+        () => ({
+          accept: "WORKFLOW_STEP",
+          drop(item: { id: string; type: string, x: number, y: number }, monitor) {
+            const delta = monitor.getDifferenceFromInitialOffset();
+            if (!delta) return;
+            const left = Math.round(item.x + delta.x);
+            const top = Math.round(item.y + delta.y);
+            moveStep(item.id, left, top);
+            return undefined;
+          },
+        }),
+        [moveStep]
+      );
+
   return (
     <Card className="shadow-lg min-h-full">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -21,36 +43,28 @@ export function WorkflowCanvas({ steps }: WorkflowCanvasProps) {
         </Button>
       </CardHeader>
       <CardContent>
-        {steps.length > 0 ? (
-          <div className="relative">
-            <div
-              className="absolute left-6 top-6 bottom-6 w-0.5 bg-border -z-10"
-              aria-hidden="true"
-            />
-            <ul className="space-y-8">
-              {steps.map((step, index) => (
-                <li key={step.id} className="relative pl-12">
-                   <span
-                    className="absolute left-[18px] top-5 flex h-6 w-6 items-center justify-center rounded-full bg-background ring-4 ring-background"
-                    aria-hidden="true"
-                  >
-                    <span className="h-3 w-3 rounded-full bg-primary" />
-                  </span>
-                  <WorkflowStepCard step={step} />
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : (
-          <div className="text-center py-16 border-2 border-dashed rounded-lg">
-            <h3 className="text-lg font-medium text-muted-foreground">
-              Your workflow is empty
-            </h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Use the AI assistant or add a step manually to get started.
-            </p>
-          </div>
-        )}
+      <div ref={drop(canvasRef)} className="relative w-full h-[800px] border-2 border-dashed rounded-lg">
+          {steps.map((step, index) => (
+            <>
+              <WorkflowStepCard key={step.id} step={step} />
+              {index < steps.length - 1 && (
+                <NodeConnector from={step} to={steps[index + 1]} />
+              )}
+            </>
+          ))}
+          {steps.length === 0 && (
+            <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                    <h3 className="text-lg font-medium text-muted-foreground">
+                    Your workflow is empty
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                    Use the AI assistant or add a step manually to get started.
+                    </p>
+                </div>
+            </div>
+            )}
+        </div>
       </CardContent>
     </Card>
   );

@@ -7,6 +7,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState } from "react";
 import type { WorkflowStep } from "@/lib/types";
 import { Bot, Database, Mail, UserPlus, Webhook } from "lucide-react";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 const initialSteps: WorkflowStep[] = [
   {
@@ -15,6 +17,7 @@ const initialSteps: WorkflowStep[] = [
     description: "Triggered when a new user signs up.",
     icon: UserPlus,
     iconColor: "text-green-500",
+    position: { x: 50, y: 50 },
   },
   {
     id: "2",
@@ -22,6 +25,7 @@ const initialSteps: WorkflowStep[] = [
     description: "Send a personalized welcome email.",
     icon: Mail,
     iconColor: "text-blue-500",
+    position: { x: 450, y: 150 },
   },
   {
     id: "3",
@@ -29,6 +33,7 @@ const initialSteps: WorkflowStep[] = [
     description: "Create a new contact in the CRM database.",
     icon: Database,
     iconColor: "text-purple-500",
+    position: { x: 50, y: 250 },
   },
   {
     id: "4",
@@ -36,6 +41,7 @@ const initialSteps: WorkflowStep[] = [
     description: "Send a webhook notification to Slack.",
     icon: Webhook,
     iconColor: "text-slate-500",
+    position: { x: 450, y: 350 },
   },
 ];
 
@@ -43,34 +49,47 @@ const initialSteps: WorkflowStep[] = [
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [steps, setSteps] = useState<WorkflowStep[]>(initialSteps);
 
-  const addStep = (step: Omit<WorkflowStep, "id">) => {
+  const addStep = (step: Omit<WorkflowStep, "id" | "position">) => {
     setSteps((prev) => [
       ...prev,
-      { ...step, id: `step-${Date.now()}-${Math.random()}` },
+      {
+        ...step,
+        id: `step-${Date.now()}-${Math.random()}`,
+        position: { x: 100, y: 100 },
+      },
     ]);
   };
+  
+  const moveStep = (id: string, x: number, y: number) => {
+    setSteps((prev) =>
+      prev.map((step) => (step.id === id ? { ...step, position: { x, y } } : step))
+    );
+  };
+
   return (
-    <div className="grid grid-cols-12 h-screen bg-background">
-      <aside className="col-span-2 border-r p-4">
-        <Card className="h-full">
-            <CardHeader>
-                <CardTitle>Node Library</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <p className="text-sm text-muted-foreground">Drag nodes to the canvas.</p>
-            </CardContent>
-        </Card>
-      </aside>
-      <main className="col-span-7 flex flex-col p-6">
-        <ScrollArea className="h-full">
-         <WorkflowCanvas steps={steps} />
-        </ScrollArea>
-      </main>
-      <section className="col-span-3 border-l p-4">
-        <ScrollArea className="h-full">
-            <AiSuggestionPanel currentSteps={steps} addStep={addStep} />
-        </ScrollArea>
-      </section>
-    </div>
+    <DndProvider backend={HTML5Backend}>
+      <div className="grid grid-cols-12 h-[calc(100vh-4rem)] bg-background">
+        <aside className="col-span-2 border-r p-4">
+          <Card className="h-full">
+              <CardHeader>
+                  <CardTitle>Node Library</CardTitle>
+              </CardHeader>
+              <CardContent>
+                  <p className="text-sm text-muted-foreground">Drag nodes to the canvas.</p>
+              </CardContent>
+          </Card>
+        </aside>
+        <main className="col-span-7 flex flex-col p-6">
+          <ScrollArea className="h-full">
+          <WorkflowCanvas steps={steps} moveStep={moveStep} />
+          </ScrollArea>
+        </main>
+        <section className="col-span-3 border-l p-4">
+          <ScrollArea className="h-full">
+              <AiSuggestionPanel currentSteps={steps} addStep={addStep} />
+          </ScrollArea>
+        </section>
+      </div>
+    </DndProvider>
   );
 }
