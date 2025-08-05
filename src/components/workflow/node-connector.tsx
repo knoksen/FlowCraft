@@ -10,12 +10,12 @@ const CARD_WIDTH = 350;
 const CARD_HEIGHT = 92; // Based on p-4 header and content inside
 
 export function NodeConnector({ from, to }: NodeConnectorProps) {
-  const fromX = from.position.x + CARD_WIDTH;
-  const fromY = from.position.y + CARD_HEIGHT / 2;
-  const toX = to.position.x;
-  const toY = to.position.y + CARD_HEIGHT / 2;
+  const fromX = from.position.x + CARD_WIDTH / 2;
+  const fromY = from.position.y + CARD_HEIGHT;
+  const toX = to.position.x + CARD_WIDTH / 2;
+  const toY = to.position.y;
 
-  const path = `M ${fromX} ${fromY} C ${fromX + 50} ${fromY}, ${toX - 50} ${toY}, ${toX} ${toY}`;
+  const path = `M ${fromX} ${fromY} C ${fromX} ${fromY + 50}, ${toX} ${toY - 50}, ${toX} ${toY}`;
 
   return (
     <svg
