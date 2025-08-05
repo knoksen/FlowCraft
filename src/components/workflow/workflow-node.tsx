@@ -13,6 +13,7 @@ export const Node: FC<WorkflowStep> = (node) => {
     const { id, title, position, selected, icon: Icon, iconColor, description, type } = node;
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
         id: id,
+        data: { node },
     });
     
     const selectNode = useWorkflowStore(s => s.selectNode);
@@ -21,8 +22,10 @@ export const Node: FC<WorkflowStep> = (node) => {
     const isSelected = selectedNodeId === id;
     
     const style = transform ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-    } : undefined;
+        transform: `translate3d(${position.x + transform.x}px, ${position.y + transform.y}px, 0)`,
+    } : {
+        transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
+    };
 
     const handleNodeClick = (e: MouseEvent) => {
         e.stopPropagation();
@@ -32,7 +35,7 @@ export const Node: FC<WorkflowStep> = (node) => {
     return (
         <div 
             ref={setNodeRef}
-            style={{ ...style, top: position.y, left: position.x }}
+            style={style}
             className={cn("absolute w-80")}
             onClick={handleNodeClick}
         >
