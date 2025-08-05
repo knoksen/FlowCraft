@@ -13,20 +13,22 @@ type WorkflowState = {
 const initialNodes: WorkflowStep[] = [
   {
     ...AVAILABLE_STEPS[0],
-    id: '1',
+    id: 'start-node',
     position: { x: 50, y: 50 },
+    config: null
   },
   {
     ...AVAILABLE_STEPS[1],
-    id: '2',
+    id: 'email-node',
     position: { x: 450, y: 150 },
+    config: null
   },
 ];
 
 export const useWorkflowStore = create<WorkflowState>((set) => ({
   nodes: initialNodes,
   edges: [
-    { id: 'e1-2', from: '1', to: '2' }
+    { id: 'e-start-email', from: 'start-node', to: 'email-node' }
   ],
   addNode: (step, position) => {
     set((state) => ({
