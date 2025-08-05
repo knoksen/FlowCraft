@@ -1,4 +1,4 @@
-import { WorkflowCanvas } from "@/components/workflow/workflow-canvas";
+import WorkflowCanvas from "@/components/workflow/workflow-canvas";
 
 export default function Home() {
   return (

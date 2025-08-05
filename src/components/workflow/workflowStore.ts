@@ -5,8 +5,7 @@ import { AVAILABLE_STEPS } from '@/lib/steps';
 
 type WorkflowState = {
   nodes: WorkflowStep[];
-  edges: { id: string; from: string; to: string }[];
-  addNode: (step: Omit<WorkflowStep, 'id' | 'position'>, position: { x: number; y: number }) => void;
+  addNode: () => void;
   moveNode: (id: string, delta: { x: number; y: number }) => void;
 };
 
@@ -25,23 +24,27 @@ const initialNodes: WorkflowStep[] = [
   },
 ];
 
+
 export const useWorkflowStore = create<WorkflowState>((set) => ({
   nodes: initialNodes,
-  edges: [
-    { id: 'e-start-email', from: 'start-node', to: 'email-node' }
-  ],
-  addNode: (step, position) => {
+  addNode: () =>
     set((state) => ({
       nodes: [
         ...state.nodes,
         {
-          ...step,
           id: nanoid(),
-          position,
-        },
-      ],
-    }));
-  },
+          title: `Step ${state.nodes.length + 1}`,
+          description: "A new step in the workflow.",
+          icon: AVAILABLE_STEPS[3].icon, // Default icon
+          type: 'action',
+          position: {
+             x: 100 + 60 * (state.nodes.length % 5),
+             y: 100 + 40 * state.nodes.length
+          },
+          config: null,
+        }
+      ]
+    })),
   moveNode: (id, delta) => {
     set((state) => ({
       nodes: state.nodes.map((node) =>

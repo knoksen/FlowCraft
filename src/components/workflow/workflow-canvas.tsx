@@ -2,23 +2,32 @@
 
 import { useWorkflowStore } from './workflowStore';
 import { Node } from './workflow-node';
-import { Plus } from 'lucide-react';
+import { DndContext, useSensor, useSensors, PointerSensor, type DragEndEvent } from '@dnd-kit/core';
 
-export function WorkflowCanvas() {
+export default function WorkflowCanvas() {
   const nodes = useWorkflowStore((s) => s.nodes);
-  const addNode = useWorkflowStore((s) => s.addNode);
+  const moveNode = useWorkflowStore((s) => s.moveNode);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
+  
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, delta } = event;
+    moveNode(active.id as string, delta);
+  }
 
   return (
-    <div className="relative w-full h-[70vh] rounded-xl bg-white shadow-inner overflow-hidden border border-gray-200 droppable-canvas">
-      {nodes.map((node) => (
-        <div
-          key={node.id}
-          className="absolute"
-          style={{ top: node.position.y, left: node.position.x, minWidth: 180 }}
-        >
-          <Node {...node} />
-        </div>
-      ))}
-    </div>
+    <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
+      <div className="relative w-full h-[70vh] rounded-xl bg-white shadow-inner overflow-hidden border border-gray-200">
+        {nodes.map((node) => (
+            <Node key={node.id} {...node} />
+        ))}
+      </div>
+    </DndContext>
   );
 }
