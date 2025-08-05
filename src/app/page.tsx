@@ -6,6 +6,7 @@ import { useAuth } from "@/auth/auth-provider";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Workflow } from "lucide-react";
+import WorkflowCanvas from "@/components/workflow/workflow-canvas";
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -51,8 +52,8 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Header />
-      <main className="flex-1">
-        <Layout user={user} />
+      <main className="flex-1 p-8">
+        <WorkflowCanvas />
       </main>
     </div>
   );
