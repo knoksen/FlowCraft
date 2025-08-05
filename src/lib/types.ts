@@ -31,7 +31,7 @@ export type WorkflowStep = {
 };
 
 export type Edge = {
-    id: string;
+    id:string;
     source: string;
     target:string;
 }
