@@ -46,10 +46,10 @@ const prompt = ai.definePrompt({
   Given the current workflow and the desired outcome, suggest the next logical step.
 
   Current Workflow:
-  {{currentWorkflow}}
+  {{{currentWorkflow}}}
 
   Desired Outcome:
-  {{desiredOutcome}}
+  {{{desiredOutcome}}}
 
   Respond with the suggested step and the reasoning behind it.
   `,
