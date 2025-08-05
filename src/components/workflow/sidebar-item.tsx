@@ -21,7 +21,7 @@ type SidebarItemProps = {
 
 export function SidebarItem({ step, isOverlay }: SidebarItemProps) {
     const { attributes, listeners, setNodeRef } = useDraggable({
-        id: nanoid(),
+        id: `sidebar-item-${step.type}-${nanoid()}`,
         data: {
             step: step,
             isSidebarItem: true,
@@ -30,9 +30,9 @@ export function SidebarItem({ step, isOverlay }: SidebarItemProps) {
 
     return (
         <div ref={setNodeRef} {...listeners} {...attributes}>
-            <Card className={cn("p-3 flex items-center gap-3 cursor-grab active:cursor-grabbing hover:border-primary/50", isOverlay && "shadow-lg")}>
-                <div className="w-8 h-8 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
-                    <step.icon className={cn("w-4 h-4", step.iconColor)} />
+            <Card className={cn("p-3 flex items-center gap-4 cursor-grab active:cursor-grabbing hover:border-primary/50 transition-all", isOverlay && "shadow-lg ring-2 ring-primary")}>
+                <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                    <step.icon className={cn("w-5 h-5", step.iconColor)} />
                 </div>
                 <div>
                     <p className="font-semibold text-sm">{step.title}</p>

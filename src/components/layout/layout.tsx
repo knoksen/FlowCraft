@@ -1,20 +1,19 @@
 
 "use client";
 
-import WorkflowCanvas from "@/components/workflow/workflow-canvas";
-import { DndContext, type DragEndEvent, type DragOverlay, useSensor, useSensors, PointerSensor, type Active, type DragStartEvent } from '@dnd-kit/core';
+import { DndContext, type DragEndEvent, DragOverlay, useSensor, useSensors, PointerSensor, type Active, type DragStartEvent } from '@dnd-kit/core';
 import { Sidebar } from "../workflow/sidebar";
 import { useState } from "react";
 import { useWorkflowStore } from "../workflow/workflowStore";
 import { SidebarItem } from "../workflow/sidebar-item";
 import { AVAILABLE_STEPS } from "@/lib/steps";
 import { Node } from "../workflow/workflow-node";
-import type { User } from "firebase/auth";
 import { nanoid } from "nanoid";
 import { Header } from "./header";
 import type { StepType } from "@/lib/types";
+import WorkflowCanvas from '../workflow/workflow-canvas';
 
-export default function Layout({ user }: { user: User }) {
+export default function Layout() {
   const { addNode, moveNode, nodes } = useWorkflowStore();
   const [activeDrag, setActiveDrag] = useState<Active | null>(null);
   
@@ -45,10 +44,10 @@ export default function Layout({ user }: { user: User }) {
           const canvasRect = document.querySelector('.droppable-canvas')?.getBoundingClientRect();
           let dropPosition = { x: 200, y: 100 };
 
-          if (canvasRect) {
+          if (canvasRect && (event.activatorEvent instanceof MouseEvent)) {
             dropPosition = {
-              x: (event.activatorEvent as MouseEvent).clientX - canvasRect.left - 160, // Adjust for node center
-              y: (event.activatorEvent as MouseEvent).clientY - canvasRect.top - 40,
+              x: event.activatorEvent.clientX - canvasRect.left - 160, // Adjust for node center
+              y: event.activatorEvent.clientY - canvasRect.top - 40,
             };
           }
           
@@ -72,7 +71,7 @@ export default function Layout({ user }: { user: User }) {
         <Header />
         <div className="flex flex-1 overflow-hidden">
           <Sidebar />
-          <main className="flex-1 h-full p-4">
+          <main className="flex-1 h-full p-4 bg-muted/30">
             <WorkflowCanvas />
           </main>
         </div>
@@ -80,7 +79,7 @@ export default function Layout({ user }: { user: User }) {
       <DragOverlay>
         {activeDrag?.data?.current?.isSidebarItem ? (
           <SidebarItem step={activeDrag.data.current.step} isOverlay />
-        ) : activeDrag?.data.current?.node ? (
+        ) : activeDrag?.data?.current?.node ? (
            <Node {...(activeDrag.data.current.node)} />
         ) : null}
       </DragOverlay>

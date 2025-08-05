@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useAuth } from "@/auth/auth-provider";
@@ -12,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { auth } from "@/lib/firebase";
-import { Bell, HelpCircle, LogIn, LogOut, User, Workflow } from "lucide-react";
+import { Bell, HelpCircle, LogIn, LogOut, User, Workflow, Save, Play, Bot } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export function Header() {
@@ -30,10 +31,25 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-card">
-      <div className="container mx-auto flex h-16 items-center space-x-4 px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto flex h-16 items-center space-x-4 px-4 sm:justify-between sm:space-x-0">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push('/')}>
           <Workflow className="h-7 w-7 text-primary" />
           <h1 className="text-2xl font-bold text-foreground">FlowCraft</h1>
+        </div>
+        
+        <div className="flex gap-2">
+            <Button variant="outline">
+                <Bot size={16} className="mr-2" />
+                AI Assist
+            </Button>
+            <Button variant="outline">
+                <Save size={16} className="mr-2" />
+                Save
+            </Button>
+             <Button>
+                <Play size={16} className="mr-2" />
+                Run
+            </Button>
         </div>
 
         <div className="flex flex-1 items-center justify-end space-x-2 sm:space-x-4">

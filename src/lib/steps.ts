@@ -1,41 +1,34 @@
 
-import { Code, Database, Mail, UserPlus, Webhook } from "lucide-react";
+import { Code, Database, Globe, Mail, UserPlus, Webhook } from "lucide-react";
 import type { WorkflowStep } from "./types";
 
 export const AVAILABLE_STEPS: Omit<WorkflowStep, 'id' | 'position' | 'config'>[] = [
   {
-    title: "New User Signup",
-    description: "Triggered when a new user signs up.",
-    icon: UserPlus,
-    iconColor: "text-green-500",
-    type: 'trigger',
+    title: "HTTP Request",
+    description: "Make an HTTP request to an external API.",
+    icon: Globe,
+    iconColor: "text-sky-500",
+    type: 'http',
   },
   {
-    title: "Send Welcome Email",
+    title: "Run Local Script",
+    description: "Execute a command on a local machine.",
+    icon: Code,
+    iconColor: "text-orange-500",
+    type: 'local_command',
+  },
+    {
+    title: "Send Email",
     description: "Send a personalized welcome email.",
     icon: Mail,
     iconColor: "text-blue-500",
-    type: 'action',
+    type: 'placeholder',
   },
   {
     title: "Add to CRM",
     description: "Create a new contact in the CRM database.",
     icon: Database,
     iconColor: "text-purple-500",
-    type: 'action',
-  },
-  {
-    title: "Notify Sales Team",
-    description: "Send a webhook notification to Slack.",
-    icon: Webhook,
-    iconColor: "text-slate-500",
-    type: 'action',
-  },
-    {
-    title: "Run Local Script",
-    description: "Execute a command on a local machine.",
-    icon: Code,
-    iconColor: "text-orange-500",
-    type: 'local_command',
+    type: 'placeholder',
   },
 ];
