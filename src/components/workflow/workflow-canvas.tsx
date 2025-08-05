@@ -9,7 +9,7 @@ export function WorkflowCanvas() {
   const addNode = useWorkflowStore((s) => s.addNode);
 
   return (
-    <div className="relative w-full h-full rounded-xl bg-muted/30 shadow-inner overflow-auto droppable-canvas">
+    <div className="relative w-full h-[70vh] rounded-xl bg-white shadow-inner overflow-hidden border border-gray-200 droppable-canvas">
       {nodes.map((node) => (
         <div
           key={node.id}
@@ -19,13 +19,6 @@ export function WorkflowCanvas() {
           <Node {...node} />
         </div>
       ))}
-       <button
-        onClick={() => addNode()}
-        className="absolute bottom-6 right-6 z-10 bg-primary text-primary-foreground rounded-full shadow-xl p-3 hover:bg-primary/90 transition"
-        aria-label="Add node"
-      >
-        <Plus size={28} />
-      </button>
     </div>
   );
 }
