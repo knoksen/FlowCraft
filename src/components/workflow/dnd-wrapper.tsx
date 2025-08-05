@@ -37,9 +37,11 @@ export default function DndWrapper({ children }: { children: React.ReactNode }) 
 
         if (active.data.current?.isSidebarItem && over?.id === 'droppable-canvas') {
             const step = active.data.current.step;
-            // You might need to adjust the position based on where it was dropped on the canvas
-            // For now, using a fixed position or calculating from event coordinates
-            addNode({ ...step, position: { x: 200, y: 100 }}); // Example position
+            const dropPosition = event.activatorEvent as MouseEvent;
+            
+            // Note: this position is relative to viewport, you might need to adjust
+            // it based on the canvas's position and zoom level in a real app.
+            addNode({ ...step, position: { x: dropPosition.clientX - 350, y: dropPosition.clientY - 100 }});
         } else if (active.id !== over?.id && over?.id === 'droppable-canvas') {
             moveNode(active.id as string, delta);
         }

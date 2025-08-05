@@ -2,19 +2,55 @@
 'use client';
 
 import type { FC } from 'react';
-import { GripVertical, Play, Trash, Cog } from 'lucide-react';
+import { Cog, Trash } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useWorkflowStore } from './workflowStore';
 import type { WorkflowStep } from '@/lib/types';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { useDraggable } from '@dnd-kit/core';
 
 export type NodeProps = WorkflowStep & {
   onStartConnection: (nodeId: string, handle: 'source' | 'target') => void;
   onEndConnection: (nodeId: string, handle: 'source' | 'target') => void;
 };
 
-export const Node: FC<NodeProps> = ({ id, title, description, icon: Icon, iconColor, selected, onStartConnection, onEndConnection, type }) => {
+export const DraggableNode: FC<{ node: WorkflowStep }> = ({ node }) => {
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id: node.id,
+    data: { node },
+  });
+
+   const style = transform ? {
+    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+  } : undefined;
+
+  const { startConnection, endConnection } = useWorkflowStore();
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        ...style,
+        position: 'absolute',
+        left: node.position.x,
+        top: node.position.y,
+        zIndex: node.selected ? 10 : 1,
+      }}
+      {...attributes}
+      {...listeners}
+    >
+      <NodeComponent 
+        {...node} 
+        onStartConnection={startConnection} 
+        onEndConnection={endConnection} 
+      />
+    </div>
+  );
+}
+
+
+export const NodeComponent: FC<NodeProps> = ({ id, title, description, icon: Icon, iconColor, selected, onStartConnection, onEndConnection, type }) => {
     const { isConnecting, connectingFrom, selectNode, deleteNode } = useWorkflowStore(state => ({
         isConnecting: !!state.connectingFrom,
         connectingFrom: state.connectingFrom,
@@ -36,6 +72,7 @@ export const Node: FC<NodeProps> = ({ id, title, description, icon: Icon, iconCo
     
     const handleCogClick = (e: React.MouseEvent) => {
         e.stopPropagation();
+        // This will both select the node and open the config modal
         selectNode(id);
     }
 
@@ -61,12 +98,16 @@ export const Node: FC<NodeProps> = ({ id, title, description, icon: Icon, iconCo
                     <CardDescription className="text-xs">{description}</CardDescription>
                 </div>
                  <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleCogClick}>
-                        <Cog className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleDeleteClick}>
-                        <Trash className="h-4 w-4 text-destructive" />
-                    </Button>
+                    {type !== 'trigger' && (
+                        <>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleCogClick}>
+                            <Cog className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleDeleteClick}>
+                            <Trash className="h-4 w-4 text-destructive" />
+                        </Button>
+                        </>
+                    )}
                  </div>
             </CardHeader>
 

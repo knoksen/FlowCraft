@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { nanoid } from 'nanoid';
 import type { WorkflowStep, Edge, StepType } from '@/lib/types';
 import { Play } from 'lucide-react';
+import type { Omit } from 'utility-types';
 
 type ConnectingFrom = {
     nodeId: string;
@@ -18,7 +19,7 @@ type State = {
   selectedNodeId: string | null;
   setWorkflowId: (id: string) => void;
   initialize: () => void;
-  addNode: (step: Omit<WorkflowStep, 'id' | 'position' | 'config'> & { position: { x: number, y: number } }) => void;
+  addNode: (step: Omit<WorkflowStep, 'id' | 'config'>) => void;
   moveNode: (id: string, delta: { x: number, y: number }) => void;
   deleteNode: (id: string) => void;
   selectNode: (id: string | null) => void;
