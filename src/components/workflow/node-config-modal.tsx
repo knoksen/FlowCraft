@@ -12,20 +12,35 @@ import {
   SheetClose,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { useForm, FormProvider, useFormContext, Controller } from 'react-hook-form';
+import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '../ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 const httpConfigSchema = z.object({
   url: z.string().url({ message: 'Please enter a valid URL.' }),
   method: z.enum(['GET', 'POST', 'PUT', 'DELETE']),
-  headers: z.string().optional(),
-  body: z.string().optional(),
+  headers: z.string().optional().refine((val) => {
+    if (!val || val.trim() === '') return true;
+    try {
+      JSON.parse(val);
+      return true;
+    } catch {
+      return false;
+    }
+  }, { message: 'Headers must be valid JSON.' }),
+  body: z.string().optional().refine((val) => {
+    if (!val || val.trim() === '') return true;
+    try {
+      JSON.parse(val);
+      return true;
+    } catch {
+      return false;
+    }
+  }, { message: 'Body must be valid JSON.' }),
 });
 
 const localCommandConfigSchema = z.object({
@@ -166,9 +181,21 @@ export function NodeConfigModal() {
 
   const currentSchema = selectedNode ? formSchemas[selectedNode.type] : z.object({});
 
+  // Prepare initial values: if headers or body are objects, stringify them for the form
+  const initialConfig = selectedNode?.config ? {
+    ...selectedNode.config,
+    headers: typeof selectedNode.config.headers === 'object' ? JSON.stringify(selectedNode.config.headers, null, 2) : selectedNode.config.headers,
+    body: typeof selectedNode.config.body === 'object' ? JSON.stringify(selectedNode.config.body, null, 2) : selectedNode.config.body,
+    args: Array.isArray(selectedNode.config.args) ? selectedNode.config.args.join(', ') : selectedNode.config.args,
+  } : {};
+
+
   const form = useForm({
     resolver: zodResolver(currentSchema),
-    values: selectedNode?.config || {},
+    values: initialConfig,
+    resetOptions: {
+      keepValues: false,
+    }
   });
 
   const onSubmit = (data: any) => {
@@ -176,25 +203,26 @@ export function NodeConfigModal() {
     
     let processedData = {...data};
 
-    // Attempt to parse headers and body if they exist
-    if (data.headers) {
+    // Attempt to parse headers and body if they exist and are strings
+    if (processedData.headers && typeof processedData.headers === 'string') {
         try {
-            processedData.headers = JSON.parse(data.headers);
+            processedData.headers = JSON.parse(processedData.headers);
         } catch (e) {
+            // Zod validation should have already caught this, but for safety:
             form.setError('headers', { type: 'manual', message: 'Invalid JSON format.'});
             return;
         }
     }
-    if (data.body) {
+    if (processedData.body && typeof processedData.body === 'string') {
         try {
-            processedData.body = JSON.parse(data.body);
+            processedData.body = JSON.parse(processedData.body);
         } catch (e) {
             form.setError('body', { type: 'manual', message: 'Invalid JSON format.'});
             return;
         }
     }
-     if (data.args && typeof data.args === 'string') {
-        processedData.args = data.args.split(',').map((arg: string) => arg.trim());
+     if (processedData.args && typeof processedData.args === 'string') {
+        processedData.args = processedData.args.split(',').map((arg: string) => arg.trim()).filter(Boolean);
     }
 
     updateNodeConfig(selectedNodeId, processedData);
@@ -223,7 +251,7 @@ export function NodeConfigModal() {
                 <SheetTitle>Configure: {selectedNode.title}</SheetTitle>
                 <SheetDescription>{selectedNode.description}</SheetDescription>
               </SheetHeader>
-              <div className="py-6 flex-1 overflow-y-auto">
+              <div className="py-6 flex-1 overflow-y-auto pr-6">
                 {renderForm()}
               </div>
               <SheetFooter>

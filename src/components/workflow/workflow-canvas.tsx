@@ -7,8 +7,7 @@ import { useWorkflowStore } from './workflowStore';
 import { Node } from './workflow-node';
 import { NodeConnector } from './connector';
 import type { WorkflowStep } from '@/lib/types';
-import { Play } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { NodeConfigModal } from './node-config-modal';
 
 function DraggableNode({ node }: { node: WorkflowStep; }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
@@ -85,6 +84,8 @@ export default function WorkflowCanvas() {
             key={node.id}
           />
         ))}
+
+        <NodeConfigModal />
       </div>
   );
 }
