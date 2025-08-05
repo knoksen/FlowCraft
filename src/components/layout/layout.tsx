@@ -1,7 +1,7 @@
 
 "use client";
 
-import { WorkflowCanvas } from "@/components/workflow/workflow-canvas";
+import WorkflowCanvas from "@/components/workflow/workflow-canvas";
 import { DndContext, type DragEndEvent, type DragOverlay, useSensor, useSensors, PointerSensor, type Active, type DragStartEvent } from '@dnd-kit/core';
 import { Sidebar } from "../workflow/sidebar";
 import { useState } from "react";

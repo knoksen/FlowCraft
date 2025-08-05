@@ -1,5 +1,6 @@
 
 import type { LucideIcon } from "lucide-react";
+import type { Timestamp } from "firebase/firestore";
 
 export type StepType = 'http' | 'local_command' | 'placeholder' | 'trigger' | 'action' | 'delay';
 
@@ -32,17 +33,17 @@ export type WorkflowStep = {
 export type Edge = {
     id: string;
     source: string;
-    target: string;
+    target:string;
 }
 
 export type Workflow = {
-    id:string;
+    id: string;
     name: string;
     steps: WorkflowStep[];
     edges: Edge[];
     userId: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: Date | Timestamp;
+    updatedAt: Date | Timestamp;
 }
 
 export type ExecutionLog = {
