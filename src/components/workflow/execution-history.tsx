@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -11,7 +12,7 @@ import { CheckCircle, Loader2, XCircle, Clock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 type ExecutionHistoryProps = {
-  userId: string;
+  userId?: string;
 };
 
 const statusIcons: Record<string, React.ReactNode> = {
@@ -31,8 +32,13 @@ export function ExecutionHistory({ userId }: ExecutionHistoryProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+        setLoading(false);
+        setExecutions([]);
+        return;
+    };
 
+    setLoading(true);
     const q = query(
       collection(db, "executionLogs"),
       where("userId", "==", userId),
@@ -64,6 +70,55 @@ export function ExecutionHistory({ userId }: ExecutionHistoryProps) {
     return () => unsubscribe();
   }, [userId]);
 
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center h-full">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      );
+    }
+
+    if (!userId) {
+        return (
+            <div className="text-center text-muted-foreground pt-10">
+                Please sign in to view execution history.
+            </div>
+        );
+    }
+    
+    if (executions.length === 0) {
+      return (
+        <div className="text-center text-muted-foreground py-10">
+          <p>No executions yet.</p>
+          <p className="text-sm">Run a workflow to see its history here.</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        {executions.map((log) => (
+          <div key={log.id} className="flex items-center space-x-4 p-2 rounded-lg hover:bg-muted">
+             <div className="flex-shrink-0">
+               {statusIcons[log.status]}
+             </div>
+             <div className="flex-1 min-w-0">
+               <p className="text-sm font-medium truncate">Execution {log.id.substring(0,6)}...</p>
+               <p className="text-xs text-muted-foreground flex items-center gap-1">
+                 <Clock className="h-3 w-3" />
+                 {formatDistanceToNow(log.startedAt, { addSuffix: true })}
+               </p>
+             </div>
+             <Badge variant={statusColors[log.status] || "secondary"} className="capitalize">
+               {log.status}
+             </Badge>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <Card className="h-full flex flex-col">
       <CardHeader>
@@ -72,36 +127,7 @@ export function ExecutionHistory({ userId }: ExecutionHistoryProps) {
       </CardHeader>
       <CardContent className="flex-grow overflow-hidden">
         <ScrollArea className="h-full">
-          {loading ? (
-            <div className="flex items-center justify-center h-full">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-          ) : executions.length === 0 ? (
-            <div className="text-center text-muted-foreground py-10">
-              <p>No executions yet.</p>
-              <p className="text-sm">Run a workflow to see its history here.</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {executions.map((log) => (
-                <div key={log.id} className="flex items-center space-x-4 p-2 rounded-lg hover:bg-muted">
-                   <div className="flex-shrink-0">
-                     {statusIcons[log.status]}
-                   </div>
-                   <div className="flex-1 min-w-0">
-                     <p className="text-sm font-medium truncate">Execution {log.id.substring(0,6)}...</p>
-                     <p className="text-xs text-muted-foreground flex items-center gap-1">
-                       <Clock className="h-3 w-3" />
-                       {formatDistanceToNow(log.startedAt, { addSuffix: true })}
-                     </p>
-                   </div>
-                   <Badge variant={statusColors[log.status] || "secondary"} className="capitalize">
-                     {log.status}
-                   </Badge>
-                </div>
-              ))}
-            </div>
-          )}
+          {renderContent()}
         </ScrollArea>
       </CardContent>
     </Card>

@@ -20,9 +20,10 @@ import { useToast } from "@/hooks/use-toast";
 import { saveWorkflow } from "@/ai/flows/save-workflow";
 import { executeWorkflow } from "@/ai/flows/execute-workflow";
 import { useState } from "react";
+import { Skeleton } from "../ui/skeleton";
 
 export function Header() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
   const { nodes, edges, workflowId, setWorkflowId } = useWorkflowStore();
@@ -172,7 +173,9 @@ export function Header() {
             <Bell className="h-5 w-5" />
           </Button>
 
-          {user ? (
+          {loading ? (
+             <Skeleton className="h-9 w-9 rounded-full" />
+          ) : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full">

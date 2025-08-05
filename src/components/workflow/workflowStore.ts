@@ -17,7 +17,7 @@ type State = {
   connectingFrom: ConnectingFrom;
   selectedNodeId: string | null;
   setWorkflowId: (id: string) => void;
-  initializeDefaultWorkflow: () => void;
+  initialize: () => void;
   addNode: (step: Omit<WorkflowStep, 'id' | 'position' | 'config'> & { position: { x: number, y: number } }) => void;
   moveNode: (id: string, delta: { x: number, y: number }) => void;
   deleteNode: (id: string) => void;
@@ -29,15 +29,19 @@ type State = {
   endConnection: (nodeId: string, handle: 'source' | 'target') => void;
 };
 
-export const useWorkflowStore = create<State>((set, get) => ({
+const initialState = {
   nodes: [],
   edges: [],
   workflowId: null,
   hydrated: false,
   connectingFrom: null,
   selectedNodeId: null,
+};
+
+export const useWorkflowStore = create<State>((set, get) => ({
+  ...initialState,
   setWorkflowId: (id) => set({ workflowId: id }),
-  initializeDefaultWorkflow: () => {
+  initialize: () => {
       const triggerNode: WorkflowStep = {
         id: 'start',
         title: 'Start Workflow',

@@ -28,10 +28,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  if (loading) {
-    return null; // Or a loading spinner
-  }
-
   return (
     <AuthContext.Provider value={{ user, loading }}>
       {children}

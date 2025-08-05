@@ -8,6 +8,7 @@ import { Node } from './workflow-node';
 import { NodeConnector } from './node-connector';
 import type { WorkflowStep } from '@/lib/types';
 import { NodeConfigModal } from './node-config-modal';
+import { Loader2 } from 'lucide-react';
 
 function DraggableNode({ node }: { node: WorkflowStep; }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
@@ -43,16 +44,16 @@ function DraggableNode({ node }: { node: WorkflowStep; }) {
 }
 
 export default function WorkflowCanvas() {
-  const { nodes, edges, hydrated, initializeDefaultWorkflow, selectNode } = useWorkflowStore(s => s);
+  const { nodes, edges, hydrated, initialize, selectNode } = useWorkflowStore(s => s);
   const { setNodeRef } = useDroppable({
       id: 'droppable-canvas',
   });
 
   useEffect(() => {
     if (!hydrated) {
-      initializeDefaultWorkflow();
+      initialize();
     }
-  }, [hydrated, initializeDefaultWorkflow]);
+  }, [hydrated, initialize]);
 
   const handleCanvasClick = (e: React.MouseEvent) => {
     // Deselect node if clicking on the canvas itself
@@ -62,7 +63,11 @@ export default function WorkflowCanvas() {
   }
 
   if (!hydrated) {
-    return <div className="w-full h-full bg-muted/30 rounded-xl border-dashed border-2" />;
+    return (
+      <div className="w-full h-full bg-muted/30 rounded-xl border-dashed border-2 flex items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
+      </div>
+    );
   }
 
   return (
