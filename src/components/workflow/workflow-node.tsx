@@ -22,10 +22,11 @@ export function Node({ id, title, description, x, y, selected }: NodeProps) {
         updateNodePosition(id, x + info.offset.x, y + info.offset.y);
       }}
       className={cn(
-        "p-4 rounded-2xl shadow-md bg-gradient-to-tr from-card to-muted/50 border text-card-foreground cursor-grab active:cursor-grabbing",
+        "relative p-4 rounded-2xl shadow-md bg-gradient-to-tr from-card to-muted/50 border text-card-foreground cursor-grab active:cursor-grabbing",
         selected ? "ring-2 ring-primary" : ""
       )}
     >
+      <Handle position="left" />
       <div className="flex items-center gap-2 mb-2">
         <GripVertical className="text-muted-foreground" size={18} />
         <span className="font-semibold text-lg">{title}</span>
@@ -35,6 +36,7 @@ export function Node({ id, title, description, x, y, selected }: NodeProps) {
         <button className="text-primary hover:text-primary/80"><Play size={18}/></button>
         <button className="text-destructive hover:text-destructive/80"><Trash size={18}/></button>
       </div>
+      <Handle position="right" />
     </motion.div>
   );
 };
