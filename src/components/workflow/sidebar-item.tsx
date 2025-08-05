@@ -6,7 +6,6 @@ import { Card } from "../ui/card";
 import { cn } from "@/lib/utils";
 import type { StepType } from "@/lib/types";
 import type { LucideIcon } from "lucide-react";
-import { nanoid } from "nanoid";
 
 type SidebarItemProps = {
     step: {
@@ -21,7 +20,7 @@ type SidebarItemProps = {
 
 export function SidebarItem({ step, isOverlay }: SidebarItemProps) {
     const { attributes, listeners, setNodeRef } = useDraggable({
-        id: `sidebar-item-${step.type}-${nanoid()}`,
+        id: `sidebar-item-${step.type}`,
         data: {
             step: step,
             isSidebarItem: true,
