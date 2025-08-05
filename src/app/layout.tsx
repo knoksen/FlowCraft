@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
-      <body className="font-sans bg-background text-foreground antialiased" suppressHydrationWarning>
+      <body className="font-sans bg-gray-50 text-gray-900 antialiased" suppressHydrationWarning>
         <AuthProvider>
           {children}
           <Toaster />
