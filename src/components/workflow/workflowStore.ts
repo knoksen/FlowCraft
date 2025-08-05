@@ -1,4 +1,5 @@
-import { create } from 'zustand';
+import { create } from "zustand";
+import { nanoid } from "nanoid";
 
 export type Node = {
   id: string;
@@ -17,29 +18,30 @@ type WorkflowState = {
 export const useWorkflowStore = create<WorkflowState>((set) => ({
   nodes: [
     {
-      id: '1',
-      title: 'Initial Step',
-      description: 'This is the first step in your workflow.',
+      id: "1",
+      title: "Initial Step",
+      description: "This is the first step in your workflow.",
       x: 100,
       y: 150,
     },
     {
-      id: '2',
-      title: 'Second Step',
-      description: 'This is another step.',
+      id: "2",
+      title: "Second Step",
+      description: "This is another step.",
       x: 400,
       y: 250,
     },
   ],
-  addNode: (newNode) =>
+  addNode: () =>
     set((state) => ({
       nodes: [
         ...state.nodes,
         {
-          ...newNode,
-          id: `node_${Date.now()}`,
-          x: 200,
-          y: 200,
+          id: nanoid(),
+          title: "New Node",
+          description: "A new step",
+          x: 100 + 50 * (state.nodes.length % 5),
+          y: 100 + 30 * (state.nodes.length % 5),
         },
       ],
     })),

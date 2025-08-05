@@ -22,19 +22,18 @@ export function Node({ id, title, description, x, y, selected }: NodeProps) {
         updateNodePosition(id, x + info.offset.x, y + info.offset.y);
       }}
       className={cn(
-        "p-4 rounded-2xl shadow-md bg-gradient-to-tr from-gray-50 to-gray-100 border text-card-foreground",
-        "dark:from-gray-800 dark:to-gray-900",
-        selected ? "ring-2 ring-blue-400" : ""
+        "p-4 rounded-2xl shadow-md bg-gradient-to-tr from-card to-muted/50 border text-card-foreground",
+        selected ? "ring-2 ring-primary" : ""
       )}
     >
       <div className="flex items-center gap-2 mb-2 cursor-grab">
-        <GripVertical className="text-gray-400" size={18} />
+        <GripVertical className="text-muted-foreground" size={18} />
         <span className="font-semibold text-lg">{title}</span>
       </div>
       <p className="text-sm text-muted-foreground mb-4">{description}</p>
       <div className="flex items-center gap-2">
-        <button className="text-blue-500 hover:text-blue-700"><Play size={18}/></button>
-        <button className="text-red-400 hover:text-red-700"><Trash size={18}/></button>
+        <button className="text-primary hover:text-primary/80"><Play size={18}/></button>
+        <button className="text-destructive hover:text-destructive/80"><Trash size={18}/></button>
       </div>
     </motion.div>
   );
@@ -43,7 +42,7 @@ export function Node({ id, title, description, x, y, selected }: NodeProps) {
 export const Handle = ({ position = "right" }) => (
   <div
     className={cn(
-      "absolute w-3 h-3 rounded-full bg-blue-400 border-2 border-white shadow",
+      "absolute w-3 h-3 rounded-full bg-primary border-2 border-card shadow",
       position === "right" ? "right-[-6px] top-1/2 -translate-y-1/2" : "left-[-6px] top-1/2 -translate-y-1/2"
     )}
   />
