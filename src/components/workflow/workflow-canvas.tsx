@@ -1,79 +1,85 @@
-
 'use client';
 
 import { useEffect } from 'react';
-import { useSensor, useSensors, PointerSensor, type DragEndEvent } from '@dnd-kit/core';
+import { DndContext, useDraggable, type DragEndEvent } from '@dnd-kit/core';
 import { useWorkflowStore } from './workflowStore';
 import { Node } from './workflow-node';
 import { Plus } from 'lucide-react';
-import { NodeConnector } from './connector';
-import { NodeConfigModal } from './node-config-modal';
+
+function DraggableNode({ node }: { node: any }) {
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id: node.id,
+    data: { node },
+  });
+
+  // Calculate drag position offset
+  const x = transform ? node.x + transform.x : node.x;
+  const y = transform ? node.y + transform.y : node.y;
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        top: y,
+        left: x,
+        minWidth: 180,
+        position: 'absolute',
+        zIndex: node.selected ? 10 : 1,
+        cursor: 'grab',
+      }}
+      {...attributes}
+      {...listeners}
+    >
+      <Node {...node} />
+    </div>
+  );
+}
 
 export default function WorkflowCanvas() {
-  const { nodes, edges, addNode, moveNode, selectNode, hydrated, initializeDefaultWorkflow } = useWorkflowStore(s => ({
+  const { nodes, hydrated, setNodes, addNode, moveNode } = useWorkflowStore(s => ({
     nodes: s.nodes,
-    edges: s.edges,
-    addNode: s.addNode,
-    moveNode: s.moveNode,
-    selectNode: s.selectNode,
     hydrated: s.hydrated,
-    initializeDefaultWorkflow: s.initializeDefaultWorkflow,
+    setNodes: s.setNodes,
+    addNode: s.addNode,
+    moveNode: s.moveNode
   }));
 
+  // Ensure initial state is only set on the client!
   useEffect(() => {
-    // The loadOrCreateWorkflow in page.tsx will handle hydration when using Firestore.
-    // This is a fallback for when not using Firestore persistence.
-    if (!hydrated && !useWorkflowStore.getState().workflow) {
-      initializeDefaultWorkflow();
+    if (!hydrated) {
+      setNodes([
+        { id: crypto.randomUUID(), title: 'Trigger', x: 60, y: 70, type: 'trigger' },
+      ]);
     }
-  }, [hydrated, initializeDefaultWorkflow]);
+  }, [hydrated, setNodes]);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    })
-  );
-  
   function handleDragEnd(event: DragEndEvent) {
     const { active, delta } = event;
-    const nodeId = active.id as string;
-    // Check if the dragged item is a node from the canvas
-    if (nodes.some(n => n.id === nodeId)) {
-      moveNode(nodeId, delta);
+    const node = nodes.find((n) => n.id === active.id);
+    if (node) {
+      moveNode(node.id, node.x + delta.x, node.y + delta.y);
     }
   }
 
-  return (
-    <div className="relative w-full h-[70vh] rounded-xl bg-background shadow-inner overflow-hidden border border-border droppable-canvas" onClick={() => selectNode(null)}>
-      <svg className="absolute w-full h-full" pointerEvents="none">
-        {edges.map(edge => {
-          const fromNode = nodes.find(n => n.id === edge.source);
-          const toNode = nodes.find(n => n.id === edge.target);
-          if (fromNode && toNode) {
-            return <NodeConnector key={edge.id} from={fromNode} to={toNode} />;
-          }
-          return null;
-        })}
-      </svg>
-      
-      {nodes.map((node) => (
-          <Node key={node.id} {...node} />
-      ))}
-      
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          addNode();
-        }}
-        className="absolute bottom-6 right-6 z-10 bg-primary text-primary-foreground rounded-full shadow-xl p-3 hover:bg-primary/90 transition"
-        aria-label="Add node"
-      >
-        <Plus size={28} />
-      </button>
+  if (!hydrated) {
+    // Avoid rendering until store is ready to prevent hydration error!
+    return <div className="w-full h-[70vh] bg-background rounded-xl" />;
+  }
 
-      <NodeConfigModal />
-    </div>
+  return (
+    <DndContext onDragEnd={handleDragEnd}>
+      <div className="relative w-full h-[70vh] rounded-xl bg-background shadow-inner overflow-hidden border border-border">
+        {nodes.map((node) => (
+          <DraggableNode node={node} key={node.id} />
+        ))}
+        <button
+          onClick={addNode}
+          className="absolute bottom-6 right-6 z-10 bg-primary text-primary-foreground rounded-full shadow-xl p-3 hover:bg-primary/90 transition"
+          aria-label="Add node"
+        >
+          <Plus size={28} />
+        </button>
+      </div>
+    </DndContext>
   );
 }
