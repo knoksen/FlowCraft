@@ -22,8 +22,10 @@ export function Node({ id, title, description, icon: Icon, iconColor, position, 
     });
 
     const style = transform ? {
-        transform: `translate3d(${position.x + transform.x}px, ${position.y + transform.y}px, 0)`,
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
         position: 'absolute' as const,
+        left: position.x,
+        top: position.y,
     } : {
         position: 'absolute' as const,
         left: position.x,
@@ -34,7 +36,7 @@ export function Node({ id, title, description, icon: Icon, iconColor, position, 
     <div
       ref={setNodeRef}
       style={style}
-      className={cn("w-80", isOverlay ? "z-50" : "z-10")}
+      className={cn("w-80 z-10", isOverlay && "z-50")}
     >
       <Card
         className={cn(

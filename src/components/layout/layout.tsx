@@ -2,7 +2,7 @@
 "use client";
 
 import { WorkflowCanvas } from "@/components/workflow/workflow-canvas";
-import { DndContext, type DragEndEvent, type DragOverlay, useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
+import { DndContext, type DragEndEvent, type DragOverlay, useSensor, useSensors, PointerSensor, type Active } from '@dnd-kit/core';
 import { Sidebar } from "../workflow/sidebar";
 import { useState } from "react";
 import { useWorkflowStore } from "../workflow/workflowStore";
@@ -10,10 +10,11 @@ import { SidebarItem } from "../workflow/sidebar-item";
 import { AVAILABLE_STEPS } from "@/lib/steps";
 import { Node } from "../workflow/workflow-node";
 import { nanoid } from "nanoid";
+import type { User } from "firebase/auth";
 
-export default function Layout({ user }: { user: any }) {
+export default function Layout({ user }: { user: User }) {
   const { addNode, moveNode } = useWorkflowStore();
-  const [activeDrag, setActiveDrag] = useState<any>(null);
+  const [activeDrag, setActiveDrag] = useState<Active | null>(null);
   
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -23,25 +24,30 @@ export default function Layout({ user }: { user: any }) {
     })
   );
 
-  const handleDragStart = (event: any) => {
+  const handleDragStart = (event: { active: Active }) => {
     setActiveDrag(event.active);
   };
   
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over, delta } = event;
 
-    if (over && active.data.current?.isSidebarItem) {
+    if (over?.id === 'canvas' && active.data.current?.isSidebarItem) {
         const stepType = active.data.current.step.type;
         const stepDetails = AVAILABLE_STEPS.find(s => s.type === stepType);
+        
+        const canvasRect = document.querySelector('.droppable-canvas')?.getBoundingClientRect();
+        const dropX = active.activatorEvent.clientX - (canvasRect?.left ?? 0);
+        const dropY = active.activatorEvent.clientY - (canvasRect?.top ?? 0);
+
         if (stepDetails) {
             addNode({
                 id: nanoid(),
                 ...stepDetails,
-                position: { x: (active.activatorEvent.clientX) - 300, y: active.activatorEvent.clientY - 100 },
+                position: { x: dropX - 160, y: dropY - 40 }, // Adjust for node center
                 config: null
             });
         }
-    } else if (!active.data.current?.isSidebarItem) {
+    } else if (!active.data.current?.isSidebarItem && active.id) {
       moveNode(active.id as string, { x: delta.x, y: delta.y });
     }
 
@@ -60,7 +66,7 @@ export default function Layout({ user }: { user: any }) {
         {activeDrag?.data?.current?.isSidebarItem ? (
           <SidebarItem step={activeDrag.data.current.step} isOverlay />
         ) : activeDrag ? (
-           <Node id={activeDrag.id} {...activeDrag.data.current.node} isOverlay/>
+           <Node id={activeDrag.id as string} {...activeDrag.data.current?.node} isOverlay/>
         ) : null}
       </DragOverlay>
     </DndContext>

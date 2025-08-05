@@ -3,7 +3,7 @@ import React from 'react';
 import type { WorkflowStep } from '@/lib/types';
 
 const CARD_WIDTH = 320; // w-80
-const CARD_HEIGHT = 92; // Based on p-4 header and content inside
+const CARD_HEIGHT = 76; // p-4 header -> 1rem * 2 (top/bottom) + text heights.. approx 76px
 
 export function NodeConnector({ from, to }: { from: WorkflowStep; to: WorkflowStep }) {
   const fromX = from.position.x + CARD_WIDTH;

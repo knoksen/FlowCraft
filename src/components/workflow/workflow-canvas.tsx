@@ -13,7 +13,7 @@ export function WorkflowCanvas() {
   const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
 
   return (
-    <div ref={setNodeRef} className="relative w-full h-full rounded-xl bg-muted/30 shadow-inner overflow-auto">
+    <div ref={setNodeRef} className="relative w-full h-full rounded-xl bg-muted/30 shadow-inner overflow-auto droppable-canvas">
         <svg className="absolute w-full h-full pointer-events-none">
             {sortedNodes.map((node, index) => {
                 if (index < sortedNodes.length - 1) {

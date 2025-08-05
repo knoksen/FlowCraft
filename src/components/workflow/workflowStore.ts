@@ -2,6 +2,7 @@
 import { create } from "zustand";
 import type { WorkflowStep } from "@/lib/types";
 import { AVAILABLE_STEPS } from "@/lib/steps";
+import { nanoid } from "nanoid";
 
 export type Edge = {
     source: string;
@@ -11,19 +12,19 @@ export type Edge = {
 type WorkflowState = {
   nodes: WorkflowStep[];
   edges: Edge[];
-  addNode: (node: WorkflowStep) => void;
+  addNode: (node: Omit<WorkflowStep, 'config'> & { config: any }) => void;
   moveNode: (id: string, delta: { x: number; y: number }) => void;
 };
 
 const initialNodes: WorkflowStep[] = [
     {
-        id: "1",
+        id: nanoid(),
         ...AVAILABLE_STEPS[0],
         position: { x: 50, y: 50 },
         config: null
     },
     {
-        id: "2",
+        id: nanoid(),
         ...AVAILABLE_STEPS[1],
         position: { x: 450, y: 150 },
         config: null
