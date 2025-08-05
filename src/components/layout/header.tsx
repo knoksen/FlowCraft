@@ -13,17 +13,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { auth } from "@/lib/firebase";
-import { Bell, HelpCircle, LogIn, LogOut, User, Workflow, Save, Play, Bot } from "lucide-react";
+import { Bell, HelpCircle, LogIn, LogOut, User, Workflow, Save, Play, Bot, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useWorkflowStore } from "../workflow/workflowStore";
 import { useToast } from "@/hooks/use-toast";
 import { saveWorkflow } from "@/ai/flows/save-workflow";
+import { executeWorkflow } from "@/ai/flows/execute-workflow";
+import { useState } from "react";
 
 export function Header() {
   const { user } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
-  const { nodes, edges } = useWorkflowStore();
+  const { nodes, edges, workflowId, setWorkflowId } = useWorkflowStore();
+  const [isSaving, setIsSaving] = useState(false);
+  const [isRunning, setIsRunning] = useState(false);
+
 
   const handleSignOut = async () => {
     await auth.signOut();
@@ -44,6 +49,7 @@ export function Header() {
       return;
     }
     
+    setIsSaving(true);
     toast({
       title: "Saving...",
       description: "Your workflow is being saved.",
@@ -55,6 +61,7 @@ export function Header() {
       
       const result = await saveWorkflow({
         userId: user.uid,
+        workflowId: workflowId || undefined,
         name: "My Awesome Workflow", // Placeholder name
         nodes: nodesToSave,
         edges,
@@ -65,6 +72,10 @@ export function Header() {
           title: "Success!",
           description: result.message,
         });
+        if (result.workflowId && !workflowId) {
+            setWorkflowId(result.workflowId);
+        }
+        return result.workflowId;
       } else {
         throw new Error(result.message);
       }
@@ -74,7 +85,50 @@ export function Header() {
         title: "Error Saving Workflow",
         description: error.message || "An unexpected error occurred.",
       });
+      return null;
+    } finally {
+        setIsSaving(false);
     }
+  }
+  
+  const handleRunWorkflow = async () => {
+      setIsRunning(true);
+      
+      const savedWorkflowId = await handleSaveWorkflow();
+      
+      if (!savedWorkflowId) {
+          toast({
+              variant: "destructive",
+              title: "Run Failed",
+              description: "Could not save the workflow before running. Please try saving manually first.",
+          });
+          setIsRunning(false);
+          return;
+      }
+
+      toast({
+          title: "Executing Workflow",
+          description: `Kicking off workflow ${savedWorkflowId.substring(0, 6)}...`,
+      });
+
+      try {
+          const result = await executeWorkflow({
+              workflowId: savedWorkflowId,
+              userId: user!.uid,
+          });
+          toast({
+              title: "Execution Started",
+              description: `Execution ID: ${result.executionId.substring(0,6)}... is ${result.status}`,
+          });
+      } catch (error: any) {
+           toast({
+              variant: "destructive",
+              title: "Execution Error",
+              description: error.message || "An unexpected error occurred.",
+          });
+      } finally {
+          setIsRunning(false);
+      }
   }
 
   return (
@@ -90,12 +144,12 @@ export function Header() {
                 <Bot size={16} className="mr-2" />
                 AI Assist
             </Button>
-            <Button variant="outline" onClick={handleSaveWorkflow}>
-                <Save size={16} className="mr-2" />
+            <Button variant="outline" onClick={handleSaveWorkflow} disabled={isSaving || isRunning}>
+                {isSaving ? <Loader2 size={16} className="mr-2 animate-spin"/> : <Save size={16} className="mr-2" />}
                 Save
             </Button>
-             <Button>
-                <Play size={16} className="mr-2" />
+             <Button onClick={handleRunWorkflow} disabled={isSaving || isRunning}>
+                {isRunning ? <Loader2 size={16} className="mr-2 animate-spin"/> : <Play size={16} className="mr-2" />}
                 Run
             </Button>
         </div>

@@ -39,7 +39,7 @@ export type Edge = {
 export type Workflow = {
     id: string;
     name: string;
-    steps: WorkflowStep[];
+    nodes: WorkflowStep[];
     edges: Edge[];
     userId: string;
     createdAt: Date | Timestamp;

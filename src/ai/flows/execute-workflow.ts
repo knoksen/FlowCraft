@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -58,9 +59,9 @@ const executeWorkflowFlow = ai.defineFlow(
     if (!workflowDoc.exists) {
       throw new Error(`Workflow with ID ${workflowId} not found.`);
     }
-    const workflow = workflowDoc.data() as { steps: WorkflowStep[] };
+    const workflowData = workflowDoc.data()!;
+    const steps = (workflowData.nodes as WorkflowStep[]).sort((a, b) => a.position.y - b.position.y);
 
-    const steps = workflow.steps.sort((a, b) => a.position.y - b.position.y);
 
     const executionLogRef = db.collection('executionLogs').doc();
     await executionLogRef.set({
@@ -75,6 +76,9 @@ const executeWorkflowFlow = ai.defineFlow(
     let pendingJobs = 0;
 
     for (const step of steps) {
+        // Skip the trigger step
+        if (step.type === 'trigger') continue;
+
         const stepLog: Partial<StepLog> & { stepId: string } = {
             stepId: step.id,
             status: 'pending',
@@ -84,7 +88,12 @@ const executeWorkflowFlow = ai.defineFlow(
             switch (step.type) {
                 case 'http':
                     const httpConfig = step.config as HttpStepConfig;
-                    const response = await axios(httpConfig);
+                    const response = await axios({
+                        method: httpConfig.method,
+                        url: httpConfig.url,
+                        headers: httpConfig.headers,
+                        data: httpConfig.body,
+                    });
                     stepLog.status = 'success';
                     stepLog.output = response.data;
                     break;

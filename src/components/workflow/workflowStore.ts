@@ -12,9 +12,11 @@ type ConnectingFrom = {
 type State = {
   nodes: WorkflowStep[];
   edges: Edge[];
+  workflowId: string | null;
   hydrated: boolean;
   connectingFrom: ConnectingFrom;
   selectedNodeId: string | null;
+  setWorkflowId: (id: string) => void;
   initializeDefaultWorkflow: () => void;
   addNode: (step: Omit<WorkflowStep, 'id' | 'position' | 'config'> & { position: { x: number, y: number } }) => void;
   moveNode: (id: string, delta: { x: number, y: number }) => void;
@@ -30,9 +32,11 @@ type State = {
 export const useWorkflowStore = create<State>((set, get) => ({
   nodes: [],
   edges: [],
+  workflowId: null,
   hydrated: false,
   connectingFrom: null,
   selectedNodeId: null,
+  setWorkflowId: (id) => set({ workflowId: id }),
   initializeDefaultWorkflow: () => {
       const triggerNode: WorkflowStep = {
         id: 'start',

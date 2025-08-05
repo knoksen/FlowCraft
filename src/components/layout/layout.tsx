@@ -12,9 +12,12 @@ import { nanoid } from "nanoid";
 import { Header } from "./header";
 import type { StepType } from "@/lib/types";
 import WorkflowCanvas from '../workflow/workflow-canvas';
+import { ExecutionHistory } from '../workflow/execution-history';
+import { useAuth } from '@/auth/auth-provider';
 
 export default function Layout() {
   const { addNode, moveNode, nodes } = useWorkflowStore();
+  const { user } = useAuth();
   const [activeDrag, setActiveDrag] = useState<Active | null>(null);
   
   const sensors = useSensors(
@@ -74,6 +77,9 @@ export default function Layout() {
           <main className="flex-1 h-full p-4 bg-muted/30">
             <WorkflowCanvas />
           </main>
+          <aside className="w-96 border-l bg-background p-4">
+            {user && <ExecutionHistory userId={user.uid} />}
+          </aside>
         </div>
       </div>
       <DragOverlay>
