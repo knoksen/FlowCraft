@@ -1,3 +1,4 @@
+
 import { create } from "zustand";
 import { nanoid } from "nanoid";
 
@@ -9,14 +10,19 @@ export type Node = {
   y: number;
 };
 
+export type Edge = {
+    source: string;
+    target: string;
+}
+
 type WorkflowState = {
   nodes: Node[];
+  edges: Edge[];
   addNode: (node: Omit<Node, 'id' | 'x' | 'y'>) => void;
   updateNodePosition: (id: string, x: number, y: number) => void;
 };
 
-export const useWorkflowStore = create<WorkflowState>((set) => ({
-  nodes: [
+const initialNodes: Node[] = [
     {
       id: "1",
       title: "Initial Step",
@@ -31,7 +37,15 @@ export const useWorkflowStore = create<WorkflowState>((set) => ({
       x: 400,
       y: 250,
     },
-  ],
+];
+
+const initialEdges: Edge[] = [
+    { source: "1", target: "2"}
+]
+
+export const useWorkflowStore = create<WorkflowState>((set) => ({
+  nodes: initialNodes,
+  edges: initialEdges,
   addNode: (node) =>
     set((state) => ({
       nodes: [
