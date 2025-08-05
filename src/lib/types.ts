@@ -26,12 +26,20 @@ export type WorkflowStep = {
   position: { x: number; y: number };
   type: StepType;
   config: HttpStepConfig | LocalCommandStepConfig | null;
+  selected?: boolean;
 };
 
-export type Workflow = {
+export type Edge = {
     id: string;
+    source: string;
+    target: string;
+}
+
+export type Workflow = {
+    id:string;
     name: string;
     steps: WorkflowStep[];
+    edges: Edge[];
     userId: string;
     createdAt: Date;
     updatedAt: Date;

@@ -1,10 +1,11 @@
 import { create } from 'zustand';
 import { nanoid } from 'nanoid';
-import type { WorkflowStep } from '@/lib/types';
+import type { WorkflowStep, Edge } from '@/lib/types';
 import { AVAILABLE_STEPS } from '@/lib/steps';
 
 type WorkflowState = {
   nodes: WorkflowStep[];
+  edges: Edge[];
   addNode: () => void;
   moveNode: (id: string, delta: { x: number; y: number }) => void;
 };
@@ -13,7 +14,7 @@ const initialNodes: WorkflowStep[] = [
   {
     ...AVAILABLE_STEPS[0],
     id: 'start-node',
-    position: { x: 50, y: 50 },
+    position: { x: 50, y: 150 },
     config: null
   },
   {
@@ -24,9 +25,14 @@ const initialNodes: WorkflowStep[] = [
   },
 ];
 
+const initialEdges: Edge[] = [
+    { id: 'e-start-email', source: 'start-node', target: 'email-node' }
+];
+
 
 export const useWorkflowStore = create<WorkflowState>((set) => ({
   nodes: initialNodes,
+  edges: initialEdges,
   addNode: () =>
     set((state) => ({
       nodes: [
@@ -39,7 +45,7 @@ export const useWorkflowStore = create<WorkflowState>((set) => ({
           type: 'action',
           position: {
              x: 100 + 60 * (state.nodes.length % 5),
-             y: 100 + 40 * state.nodes.length
+             y: 100 + 40 * (state.nodes.length % 2)
           },
           config: null,
         }

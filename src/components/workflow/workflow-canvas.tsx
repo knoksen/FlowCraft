@@ -3,9 +3,13 @@
 import { useWorkflowStore } from './workflowStore';
 import { Node } from './workflow-node';
 import { DndContext, useSensor, useSensors, PointerSensor, type DragEndEvent } from '@dnd-kit/core';
+import { Plus } from 'lucide-react';
+import { NodeConnector } from './node-connector';
 
 export default function WorkflowCanvas() {
   const nodes = useWorkflowStore((s) => s.nodes);
+  const edges = useWorkflowStore((s) => s.edges);
+  const addNode = useWorkflowStore((s) => s.addNode);
   const moveNode = useWorkflowStore((s) => s.moveNode);
 
   const sensors = useSensors(
@@ -23,10 +27,29 @@ export default function WorkflowCanvas() {
 
   return (
     <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
-      <div className="relative w-full h-[70vh] rounded-xl bg-white shadow-inner overflow-hidden border border-gray-200">
+      <div className="relative w-full h-[70vh] rounded-xl bg-background shadow-inner overflow-hidden border border-border">
+         <svg className="absolute w-full h-full" pointerEvents="none">
+           {edges.map(edge => {
+             const fromNode = nodes.find(n => n.id === edge.source);
+             const toNode = nodes.find(n => n.id === edge.target);
+             if (fromNode && toNode) {
+                return <NodeConnector key={edge.id} from={fromNode} to={toNode} />;
+             }
+             return null;
+           })}
+        </svg>
+
         {nodes.map((node) => (
             <Node key={node.id} {...node} />
         ))}
+        
+        <button
+          onClick={addNode}
+          className="absolute bottom-6 right-6 z-10 bg-primary text-primary-foreground rounded-full shadow-xl p-3 hover:bg-primary/90 transition"
+          aria-label="Add node"
+        >
+          <Plus size={28} />
+      </button>
       </div>
     </DndContext>
   );
