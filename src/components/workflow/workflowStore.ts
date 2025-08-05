@@ -16,7 +16,7 @@ type State = {
   connectingFrom: ConnectingFrom;
   selectedNodeId: string | null;
   initializeDefaultWorkflow: () => void;
-  addNode: (step: Omit<WorkflowStep, 'id' | 'position' | 'config'>) => void;
+  addNode: (step: Omit<WorkflowStep, 'id' | 'position' | 'config'> & { position: { x: number, y: number } }) => void;
   moveNode: (id: string, delta: { x: number, y: number }) => void;
   deleteNode: (id: string) => void;
   selectNode: (id: string | null) => void;
@@ -51,7 +51,6 @@ export const useWorkflowStore = create<State>((set, get) => ({
       const newNode: WorkflowStep = {
         ...step,
         id: nanoid(),
-        position: { x: 200, y: 100 }, // Default position
         config: null,
       };
       return { nodes: [...state.nodes, newNode] };
