@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { useWorkflowStore } from './workflowStore';
 import { Node } from './workflow-node';
-import { NodeConnector } from './connector';
+import { NodeConnector } from './node-connector';
 import type { WorkflowStep } from '@/lib/types';
 import { NodeConfigModal } from './node-config-modal';
 
@@ -43,7 +43,7 @@ function DraggableNode({ node }: { node: WorkflowStep; }) {
 }
 
 export default function WorkflowCanvas() {
-    const { nodes, edges, hydrated, initializeDefaultWorkflow, selectNode } = useWorkflowStore(s => s);
+  const { nodes, edges, hydrated, initializeDefaultWorkflow, selectNode } = useWorkflowStore(s => s);
   const { setNodeRef } = useDroppable({
       id: 'droppable-canvas',
   });
@@ -62,7 +62,7 @@ export default function WorkflowCanvas() {
   }
 
   if (!hydrated) {
-    return <div className="w-full h-full bg-background rounded-xl border-dashed border-2" />;
+    return <div className="w-full h-full bg-muted/30 rounded-xl border-dashed border-2" />;
   }
 
   return (

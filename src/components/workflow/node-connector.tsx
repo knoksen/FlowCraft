@@ -9,25 +9,9 @@ type ConnectorProps = {
 };
 
 const NODE_WIDTH = 320; 
-const NODE_HEIGHT = 84; // Adjusted for p-4 and text size
+const NODE_HEIGHT = 84; 
 
 export function NodeConnector({ from, to }: ConnectorProps) {
-  const fromX = from.position.x + NODE_WIDTH / 2;
-  const fromY = from.position.y + NODE_HEIGHT / 2;
-  
-  const toX = to.position.x + NODE_WIDTH / 2;
-  const toY = to.position.y + NODE_HEIGHT / 2;
-
-  // Midpoints
-  const midX = (fromX + toX) / 2;
-  const midY = (fromY + toY) / 2;
-
-  // Use a simple quadratic bezier for a gentle curve
-  // Control point is offset from the midpoint
-  const controlX = midX;
-  const controlY = midY - 50;
-
-  // Path from right side of 'from' node to left side of 'to' node
   const pathFromX = from.position.x + NODE_WIDTH;
   const pathFromY = from.position.y + NODE_HEIGHT / 2;
   const pathToX = to.position.x;
