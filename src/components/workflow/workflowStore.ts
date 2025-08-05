@@ -3,6 +3,7 @@ import { create } from "zustand";
 import type { WorkflowStep } from "@/lib/types";
 import { AVAILABLE_STEPS } from "@/lib/steps";
 import { nanoid } from "nanoid";
+import { Bot } from "lucide-react";
 
 export type Edge = {
     source: string;
@@ -12,7 +13,7 @@ export type Edge = {
 type WorkflowState = {
   nodes: WorkflowStep[];
   edges: Edge[];
-  addNode: (node: Omit<WorkflowStep, 'config'> & { config: any }) => void;
+  addNode: (node?: Partial<WorkflowStep>) => void;
   moveNode: (id: string, delta: { x: number; y: number }) => void;
 };
 
@@ -36,12 +37,21 @@ export const useWorkflowStore = create<WorkflowState>((set) => ({
   edges: [],
   addNode: (node) =>
     set((state) => {
-      // Check if a node with this ID already exists from the drag operation
-      if (state.nodes.find(n => n.id === node.id)) {
+      const newNode: WorkflowStep = {
+        id: node?.id || nanoid(),
+        title: node?.title || "New Step",
+        description: node?.description || "A new step in the workflow.",
+        icon: node?.icon || Bot,
+        type: node?.type || 'placeholder',
+        position: node?.position || { x: 100 + 50 * (state.nodes.length % 5), y: 100 + 40 * (state.nodes.length % 5) },
+        config: node?.config || null,
+      };
+
+      if (state.nodes.find(n => n.id === newNode.id)) {
         return state;
       }
       return {
-        nodes: [...state.nodes, node],
+        nodes: [...state.nodes, newNode],
       }
     }),
   moveNode: (id, delta) =>

@@ -36,12 +36,19 @@ export default function Layout({ user }: { user: User }) {
         const stepDetails = AVAILABLE_STEPS.find(s => s.type === stepType);
         
         const canvasRect = document.querySelector('.droppable-canvas')?.getBoundingClientRect();
-        const dropX = active.activatorEvent.clientX - (canvasRect?.left ?? 0);
-        const dropY = active.activatorEvent.clientY - (canvasRect?.top ?? 0);
+        
+        // Default to a reasonable position if the canvas isn't found
+        let dropX = 100;
+        let dropY = 100;
+
+        if (canvasRect) {
+          dropX = active.activatorEvent.clientX - canvasRect.left;
+          dropY = active.activatorEvent.clientY - canvasRect.top;
+        }
 
         if (stepDetails) {
             addNode({
-                id: nanoid(),
+                id: active.id as string,
                 ...stepDetails,
                 position: { x: dropX - 160, y: dropY - 40 }, // Adjust for node center
                 config: null
