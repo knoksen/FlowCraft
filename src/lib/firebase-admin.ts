@@ -1,7 +1,10 @@
 import * as admin from 'firebase-admin';
 
-// This prevents Firebase from being initialized more than once.
-if (!admin.apps.length) {
+function getFirebaseAdmin() {
+  if (admin.apps.length > 0) {
+    return admin.app();
+  }
+
   // Check if the service account JSON is available in the environment variables
   // This is the recommended way for security reasons, especially in production.
   if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
@@ -26,7 +29,10 @@ if (!admin.apps.length) {
         // for features that don't require admin access.
     }
   }
+  return admin.app();
 }
 
-export const db = admin.firestore();
-export const auth = admin.auth();
+const app = getFirebaseAdmin();
+
+export const db = app.firestore();
+export const auth = app.auth();
