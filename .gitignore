@@ -43,3 +43,6 @@ next-env.d.ts
 # firebase
 firebase-debug.log
 firestore-debug.log
+
+#Ignore vscode AI rules
+.github\instructions\codacy.instructions.md
