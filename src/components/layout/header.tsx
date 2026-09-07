@@ -32,6 +32,10 @@ export function Header() {
 
 
   const handleSignOut = async () => {
+    if (!auth) {
+      return;
+    }
+
     await auth.signOut();
     router.push('/signin');
   };

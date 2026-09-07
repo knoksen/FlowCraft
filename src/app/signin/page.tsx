@@ -12,6 +12,11 @@ export default function SignIn() {
   const router = useRouter();
 
   const handleSignIn = async (provider: typeof googleProvider | typeof githubProvider) => {
+    if (!auth) {
+      console.error("Firebase is not configured.");
+      return;
+    }
+
     try {
       await signInWithPopup(auth, provider);
       router.push('/');

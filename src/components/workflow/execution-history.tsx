@@ -32,7 +32,7 @@ export function ExecutionHistory({ userId }: ExecutionHistoryProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!userId) {
+    if (!userId || !db) {
         setLoading(false);
         setExecutions([]);
         return;

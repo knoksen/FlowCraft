@@ -39,6 +39,8 @@ next-env.d.ts
 
 .genkit/*
 .env*
+/dist/
+/.codacy/
 
 # firebase
 firebase-debug.log

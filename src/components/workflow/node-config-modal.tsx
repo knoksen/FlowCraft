@@ -83,7 +83,7 @@ const HttpConfigForm = () => {
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a method" />
-                </Trigger>
+                </SelectTrigger>
               </FormControl>
               <SelectContent>
                 <SelectItem value="GET">GET</SelectItem>
